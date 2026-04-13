@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- MrTheSteve_Patches: RAF x LethalStealth compatibility -->
+<!-- Mirrors LTS_SneakingFirearmBurst.xml but matches FireMode=RealBurst (set by RAF at runtime) -->
+<animNode x_extends="LTS_SneakingFirearmDefault.xml">
+	<m_Name>FirearmRealBurst</m_Name>
+	<m_Conditions x_name="3d783c9f-e709-425a-b52e-66cf27cd6a49">
+		<m_Value>RealBurst</m_Value>
+	</m_Conditions>
+</animNode>

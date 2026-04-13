@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- MrTheSteve_Patches: RAF x LethalStealth compatibility -->
+<!-- Mirrors LTS_SneakingFirearmAuto.xml but matches FireMode=RealAuto (set by RAF at runtime) -->
+<animNode x_extends="LTS_SneakingFirearmDefault.xml">
+	<m_Name>FirearmRealAuto</m_Name>
+	<m_AnimName>Bob_SneakingAiming_LongFireArmShoot</m_AnimName>
+	<m_SpeedScale>autoShootSpeed</m_SpeedScale>
+	<m_Scalar>autoShootVarX</m_Scalar>
+	<m_Scalar2>autoShootVarY</m_Scalar2>
+	<m_2DBlends />
+	<m_2DBlends>
+		<m_XPos>-0.37</m_XPos>
+	</m_2DBlends>
+	<m_2DBlends>
+		<m_XPos>-0.19</m_XPos>
+	</m_2DBlends>
+	<m_2DBlends>
+		<m_XPos>-0.19</m_XPos>
+		<m_YPos>-0.25</m_YPos>
+	</m_2DBlends>
+	<m_2DBlends>
+		<m_XPos>-0.19</m_XPos>
+		<m_YPos>0.27</m_YPos>
+	</m_2DBlends>
+	<m_Conditions x_name="3d783c9f-e709-425a-b52e-66cf27cd6a49">
+		<m_Value>RealAuto</m_Value>
+	</m_Conditions>
+	<m_2DBlendTri>
+		<node1>3</node1>
+		<node2>2</node2>
+		<node3>4</node3>
+	</m_2DBlendTri>
+	<m_2DBlendTri>
+		<node1>5</node1>
+		<node2>3</node2>
+	</m_2DBlendTri>
+	<m_2DBlendTri>
+		<node1>4</node1>
+		<node3>3</node3>
+	</m_2DBlendTri>
+	<m_2DBlendTri>
+		<node1>2</node1>
+		<node2>3</node2>
+		<node3>5</node3>
+	</m_2DBlendTri>
+</animNode>

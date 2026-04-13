@@ -1,0 +1,150 @@
+// Part of MrTheSteve_Patches
+// Patches: WarThunder Vehicle Library (Workshop: 3399660368)
+//
+// Fixes two categories of issues in VehicleType10Ammo.txt and VehicleType10Items.txt:
+//
+//   1. Chinese display names left untranslated (MachineGun10, RocketNest10)
+//   2. Internal IDs used as display names instead of readable strings
+//
+// Script overrides work by redefining only the affected fields. PZ loads the
+// last definition wins, so this file must load after WarThunderVehicleLibrary.
+// MrTheSteve_Patches has loadModAfter=WarThunderVehicleLibrary in mod.info.
+
+module Base
+{
+    // --- Ammo items ---
+
+    item APAmmo
+    {
+        DisplayName = AP Round,
+        Icon        = APAmmo,
+    }
+    item APFSDSAmmo
+    {
+        DisplayName = APFSDS Round,
+        Icon        = APFSDSAmmo,
+    }
+    item HEAmmo
+    {
+        DisplayName = HE Round,
+        Icon        = HEAmmo,
+    }
+    item HEATAmmo
+    {
+        DisplayName = HEAT Round,
+        Icon        = HEATAmmo,
+    }
+    item 30mmAP
+    {
+        DisplayName = 30mm AP Round,
+        Icon        = 30mmAP,
+    }
+    item 30mmHE
+    {
+        DisplayName = 30mm HE Round,
+        Icon        = 30mmHE,
+    }
+    item Rocket10
+    {
+        DisplayName = Rocket Pod,
+        Icon        = Rocket10,
+    }
+    item AnTiTankMissile10
+    {
+        DisplayName = Anti-Tank Missile,
+        Icon        = AnTiTankMissile10,
+    }
+    // Chinese: 机枪挂载 = Machine Gun Mount
+    item MachineGun10
+    {
+        DisplayName = Machine Gun Mount,
+        Icon        = MachineGun10,
+    }
+    // Chinese: 火箭巢 = Rocket Nest
+    item RocketNest10
+    {
+        DisplayName = Rocket Nest,
+        Icon        = RocketNest10,
+    }
+
+    // --- Vehicle parts with raw ID display names ---
+
+    item PanzerBook
+    {
+        DisplayName = Panzer Operations Manual,
+        Icon        = PanzerBook,
+    }
+    item NormalCarSeat10
+    {
+        DisplayName = Vehicle Seat,
+    }
+    item BigGasTankForPanzer10
+    {
+        DisplayName = Large Armored Vehicle Gas Tank,
+    }
+    item EngineDoor10
+    {
+        DisplayName = Engine Cover,
+    }
+    item CarBattery10
+    {
+        DisplayName = Vehicle Battery,
+    }
+    item OldCarMuffler10
+    {
+        DisplayName = Old Muffler,
+    }
+    item OldTire10
+    {
+        DisplayName = Old Tire,
+    }
+    item NormalTire10
+    {
+        DisplayName = Standard Tire,
+    }
+    item ModernTire10
+    {
+        DisplayName = Modern Tire,
+    }
+    item NormalBrake10
+    {
+        DisplayName = Standard Brake,
+    }
+    item OldBrake10
+    {
+        DisplayName = Old Brake,
+    }
+    item ModernBrake10
+    {
+        DisplayName = Modern Brake,
+    }
+    item NormalSuspension10
+    {
+        DisplayName = Standard Suspension,
+    }
+    item ModernSuspension10
+    {
+        DisplayName = Modern Suspension,
+    }
+    item FrontCarDoor10
+    {
+        DisplayName = Front Door,
+    }
+    item BigTrunk10
+    {
+        DisplayName = Large Trunk,
+    }
+    item ModernCarMuffler10
+    {
+        DisplayName = Modern Muffler,
+    }
+    item NormalCarMuffler10
+    {
+        DisplayName = Standard Muffler,
+    }
+    item HeliGun10
+    {
+        DisplayName = Helicopter Gun Mount,
+        Icon        = MachineGun10,
+    }
+}

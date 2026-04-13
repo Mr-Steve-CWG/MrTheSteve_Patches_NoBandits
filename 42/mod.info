@@ -1,0 +1,6 @@
+name=MrTheSteve Patches (No Bandits)
+id=MrTheSteve_Patches_NoBandits
+description=A collection of small fixes, translation patches, and tweaks. Does not include Bandits/BWO patches -- safe to use without those mods active.
+modversion=1
+pzversion=42.0
+loadModAfter=MoneyFromCreditCards,LifestyleHobbies,TrueMusicRadio42,WarThunderVehicleLibrary
