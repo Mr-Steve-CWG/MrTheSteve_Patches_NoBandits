@@ -1,89 +1,137 @@
 -- WLVX_Patch.lua
--- Wraps WXStationBroadcast.OnEveryHour to loop the three scheduled shows
--- (Good Morning Knox County, The Evening Report, Kentucky Tonight) on a
--- 14-day cycle. FEMA broadcasts and weather are untouched — they run on
--- absolute worldage and degrade normally.
+-- Adds a second EveryHours handler that re-fires the three WLVX scheduled
+-- shows (GMKC, Evening Report, Kentucky Tonight) on a repeating 14-day
+-- cycle after the original content windows have expired.
 --
--- How it works:
---   cycleDay = worldage % CYCLE_LENGTH
+-- The upstream OnEveryHour is NOT wrapped or modified. It continues to
+-- handle FEMA and weather entirely on its own. It also handles the shows
+-- on worldage days 0-8/0-5/0-3 (cycle 0). Our handler takes over from
+-- cycle 1 onward (worldage >= 14), so there is no double-firing.
 --
--- The show day checks and modData "last fired" flags are replaced with
--- cycle-relative equivalents. At the start of each new cycle the per-show
--- flags are cleared so the shows can fire again from day 0.
+-- Show windows within each 14-day cycle (cycle 1+):
+--   GMKC             — 7am,  cycle days 0-8   (content: gmkcDay 1-9)
+--   Evening Report   — 5pm,  cycle days 0-5   (content: evrDay 1-6)
+--   Kentucky Tonight — 10pm, cycle days 0-3   (content: kytDay 1-4)
+--   Days 9-13: no scheduled shows (FEMA loop from upstream continues)
 --
--- Show windows within each 14-day cycle:
---   GMKC             — 7am,  cycle days 0-8   (9 episodes)
---   Evening Report   — 5pm,  cycle days 0-5   (6 episodes)
---   Kentucky Tonight — 10pm, cycle days 0-3   (4 episodes)
---   Days 9-13: FEMA loop only, no scheduled shows
---
--- FEMA variant and degradation are computed from absolute worldage,
--- so they keep aging regardless of show cycle resets.
+-- Per-day deduplication uses separate modData keys (WX_PATCH_*) so we
+-- never interfere with the upstream keys the original handler uses.
 
 local CYCLE_LENGTH = 14
 
--- ---------------------------------------------------------------------------
--- installPatch — called from OnLoadRadioScripts so WXStationBroadcast is
--- guaranteed to be fully initialised before we wrap anything.
--- ---------------------------------------------------------------------------
 local function installPatch()
-    if not WXStationBroadcast or not WXStationBroadcast.OnEveryHour then
+    if not WXStationBroadcast then
         print("[WLVX_Patch] WXStationBroadcast not found — patch not applied")
         return
     end
 
-    local _orig = WXStationBroadcast.OnEveryHour
+    local function getChannel()
+        return WXStation and WXStation.cache and WXStation.cache["TV-WXCH01"]
+    end
 
-    WXStationBroadcast.OnEveryHour = function(_channel, _gametime, _radio)
+    local function onEveryHour()
+        -- Only active from cycle 1 onward; upstream handles cycle 0.
         local worldage = WXStationBroadcast.getWorldAgeDays()
-        local cycleDay  = worldage % CYCLE_LENGTH
-        local cycleIndex = math.floor(worldage / CYCLE_LENGTH)
+        if worldage < CYCLE_LENGTH then return end
+
+        local channel = getChannel()
+        if not channel then return end
 
         local gt = getGameTime()
-        if not gt then
-            _orig(_channel, _gametime, _radio)
-            return
-        end
+        if not gt then return end
 
-        local modData = gt:getModData()
+        local hour     = gt:getHour()
+        local cycleDay = worldage % CYCLE_LENGTH
+        local modData  = gt:getModData()
+        local rg       = newrandom()
+        local radio    = getZomboidRadio()
 
-        -- On each new cycle boundary clear the per-day show flags so episodes
-        -- can fire again. WX_PATCH_LastResetCycle tracks which cycle we last
-        -- reset on so we only do this once per cycle, not every hour.
-        if modData.WX_PATCH_LastResetCycle == nil
-            or cycleIndex > modData.WX_PATCH_LastResetCycle then
+        local sandbox = WXStationBroadcast.getSandbox and WXStationBroadcast.getSandbox() or {}
+        local broadcastMode = sandbox.BroadcastMode
+        if broadcastMode == nil then broadcastMode = 3 end
+        if broadcastMode ~= 3 then return end
 
-            modData.WX_GMKC_LastDay  = -1
-            modData.WX_EVR_LastDay   = -1
-            modData.WX_KYT_LastDay   = -1
-            modData.WX_GMKC_Alert6   = false
-            modData.WX_PATCH_LastResetCycle = cycleIndex
+        -- Initialise patch-specific deduplication keys.
+        if modData.WX_PATCH_GMKC_LastDay == nil then modData.WX_PATCH_GMKC_LastDay = -1    end
+        if modData.WX_PATCH_EVR_LastDay  == nil then modData.WX_PATCH_EVR_LastDay  = -1    end
+        if modData.WX_PATCH_KYT_LastDay  == nil then modData.WX_PATCH_KYT_LastDay  = -1    end
+        if modData.WX_PATCH_Alert6       == nil then modData.WX_PATCH_Alert6       = false  end
+        if modData.WX_PATCH_LastCycle    == nil then modData.WX_PATCH_LastCycle    = -1    end
+
+        -- Reset per-day flags at cycle boundary.
+        local cycleIndex = math.floor(worldage / CYCLE_LENGTH)
+        if cycleIndex > modData.WX_PATCH_LastCycle then
+            modData.WX_PATCH_GMKC_LastDay = -1
+            modData.WX_PATCH_EVR_LastDay  = -1
+            modData.WX_PATCH_KYT_LastDay  = -1
+            modData.WX_PATCH_Alert6       = false
+            modData.WX_PATCH_LastCycle    = cycleIndex
             print(string.format(
-                "[WLVX_Patch] Cycle %d started (worldage=%d, cycleDay=%d) — show flags reset",
+                "[WLVX_Patch] Cycle %d (worldage=%d, cycleDay=%d) — flags reset",
                 cycleIndex, worldage, cycleDay
             ))
         end
 
-        -- Temporarily replace getWorldAgeDays so the scheduled show checks
-        -- inside the original function see cycleDay instead of absolute
-        -- worldage.  FEMA and weather call getWorldAgeDays too, but their
-        -- variant/degradation logic lives in helper functions
-        -- (getFEMAVariant, getFEMADegradationLevel, getWeatherDegradationLevel)
-        -- which we leave alone — those still read absolute worldage via the
-        -- real getWorldAgeDays captured in their own closures at load time.
-        -- The only risk is if FEMA's hoursSinceStart calc inside OnEveryHour
-        -- itself uses getWorldAgeDays — it does not; it uses the local
-        -- `worldage` variable captured before our swap, so we are safe.
-        local _origGetAge = WXStationBroadcast.getWorldAgeDays
-        WXStationBroadcast.getWorldAgeDays = function() return cycleDay end
+        -- SLOT 1: Good Morning Knox County — 7am, cycle days 0-8
+        if hour == 7 and cycleDay >= 0 and cycleDay <= 8
+            and modData.WX_PATCH_GMKC_LastDay ~= cycleDay then
 
-        _orig(_channel, _gametime, _radio)
+            modData.WX_PATCH_GMKC_LastDay = cycleDay
+            local gmkcDay = cycleDay + 1
+            local bc = RadioBroadCast.new("GMKC-P-" .. tostring(rg:random(100000, 999999)), -1, -1)
+            WXStationBroadcast.addGMKCBroadcast(bc, gmkcDay, gt)
+            channel:setAiringBroadcast(bc)
+            WXStationBroadcast.PlaySound(radio, "GMKIntro")
+            return
+        end
 
-        WXStationBroadcast.getWorldAgeDays = _origGetAge
+        -- SLOT 2: The Evening Report — 5pm, cycle days 0-5
+        if hour == 17 and cycleDay >= 0 and cycleDay <= 5
+            and modData.WX_PATCH_EVR_LastDay ~= cycleDay then
+
+            modData.WX_PATCH_EVR_LastDay = cycleDay
+            local evrDay = cycleDay + 1
+            local bc = RadioBroadCast.new("EVR-P-" .. tostring(rg:random(100000, 999999)), -1, -1)
+            WXStationBroadcast.addEVRBroadcast(bc, evrDay)
+            channel:setAiringBroadcast(bc)
+            WXStationBroadcast.PlaySound(radio, "EveningReport")
+            return
+        end
+
+        -- SLOT 3: Kentucky Tonight — 10pm, cycle days 0-3
+        if hour == 22 and cycleDay >= 0 and cycleDay <= 3
+            and modData.WX_PATCH_KYT_LastDay ~= cycleDay then
+
+            modData.WX_PATCH_KYT_LastDay = cycleDay
+            local kytDay = cycleDay + 1
+            local bc = RadioBroadCast.new("KYT-P-" .. tostring(rg:random(100000, 999999)), -1, -1)
+            WXStationBroadcast.addKYTBroadcast(bc, kytDay)
+            channel:setAiringBroadcast(bc)
+            WXStationBroadcast.PlaySound(radio, "KentuckyTonight")
+            return
+        end
+
+        -- SLOT 4: Day 6 Alert — fires once between 10am-4pm on cycle day 6
+        if cycleDay == 6 and not modData.WX_PATCH_Alert6
+            and hour >= 10 and hour <= 16 then
+
+            if rg:random(7) == 1 then
+                modData.WX_PATCH_Alert6 = true
+                local bc = RadioBroadCast.new("GMKC-ALT-P-" .. tostring(rg:random(100000, 999999)), -1, -1)
+                WXStationBroadcast.addGMKCAlert(bc)
+                local wxLevel = WXStationBroadcast.getWeatherDegradationLevel(worldage)
+                WXStationBroadcast.addWeatherSegment(bc, gt, radio, wxLevel, true)
+                channel:setAiringBroadcast(bc)
+                if sandbox.PlayTone ~= false then
+                    WXStationBroadcast.PlaySound(radio, "EmergencyAlertSystem")
+                end
+                return
+            end
+        end
     end
 
-    print("[WLVX_Patch] OnEveryHour wrapped — cycle length " .. CYCLE_LENGTH .. " days")
+    Events.EveryHours.Add(onEveryHour)
+    print("[WLVX_Patch] Installed — scheduled shows loop every " .. CYCLE_LENGTH .. " days from cycle 1 onward")
 end
 
--- Hook after radio scripts load so WXStationBroadcast.OnEveryHour exists.
 Events.OnLoadRadioScripts.Add(installPatch)
