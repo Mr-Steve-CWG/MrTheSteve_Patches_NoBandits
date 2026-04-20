@@ -53,10 +53,14 @@ local function applyFrequencyOverrides()
     seed("SURVIVOR_RADIO_4_Classical_For_The_Dead_Classical_for_the_Dead", 140200)
 end
 
--- Run immediately in case FI.apply() has already been called at file load time,
--- and also hook OnGameStart to cover the deferred FI.apply() call.
-applyFrequencyOverrides()
-
+-- AZAS_FrequencyIndex.lua runs its bottom-of-file FI.apply() before this file loads
+-- (we load after AZASFrequencyIndex_RefactorTest per loadModAfter). That means
+-- FI.mapping is already populated by the time we get here, but it doesn't matter:
+-- getStationFrequency() in the RadioController calls FI.getFrequency() live on every
+-- tune, and FI.getFrequency() checks FI.mapping first. So as long as our seeds are
+-- in FI.mapping before any device tunes, the correct frequencies are returned.
+-- OnGameStart fires before the player can interact with any device, so hooking there
+-- is sufficient and correct.
 if Events and Events.OnGameStart then
     Events.OnGameStart.Add(applyFrequencyOverrides)
 end
