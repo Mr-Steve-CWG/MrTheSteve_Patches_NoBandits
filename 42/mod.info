@@ -3,5 +3,5 @@ id=MrTheSteve_Patches_NoBandits
 description=A collection of small fixes, translation patches, and tweaks. Does not include Bandits/BWO patches -- safe to use without those mods active.
 modversion=1
 pzversion=42.0
-loadModAfter=MoneyFromCreditCards,LifestyleHobbies,TrueMusicRadio42,WarThunderVehicleLibrary,AZASFrequencyIndex_RefactorTest,WLVXLouisville
+loadModAfter=MoneyFromCreditCards,LifestyleHobbies,TrueMusicRadio42,WarThunderVehicleLibrary,AZASFrequencyIndex_RefactorTest,WLVXLouisville,AquatsarYachtClubB42,TrueMoozic,UH-1BHelicopter,UH1BHelicopter_B42Fix
 incompatible=Bandits2,BanditsWeekOne,Bandits_Improved_AI_&_Radio_Expansion_42.15.2_MP_(Unofficial_addon)
