@@ -34,6 +34,9 @@
 -- GUARD 1: CheckBankTile
 -- Original: crashes when adjacent squares are nil (unloaded cell edge)
 --           and when tile objects have no sprite (nil getSprite()).
+-- These are recoverable engine edge cases (unloaded cells at world edge,
+-- tile objects with no sprite), not broken mod state. Guards are appropriate
+-- but include print() so firing is visible in logs.
 -- ============================================================
 
 if MoneyFromCreditCard and MoneyFromCreditCard.OnTest then
@@ -80,7 +83,7 @@ end
 -- GUARD 2: DepositOnCreditCard
 -- Original: getAllKeepInputItems():get(0) can return nil if recipe
 --           data has no keep-input item; CardHasMoney() then crashes
---           calling getName() on nil.
+--           calling getName() on nil. Recoverable -- log and skip.
 -- ============================================================
 
 if MoneyFromCreditCard and MoneyFromCreditCard.OnCreate then
@@ -88,7 +91,10 @@ if MoneyFromCreditCard and MoneyFromCreditCard.OnCreate then
     if _origDeposit then
         MoneyFromCreditCard.OnCreate.DepositOnCreditCard = function(data, player)
             local card = data:getAllKeepInputItems():get(0)
-            if not card then return end
+            if not card then
+                print("[MrTheSteve_Patches] MFCC DepositOnCreditCard: getAllKeepInputItems():get(0) returned nil -- recipe data missing keep-input item")
+                return
+            end
             _origDeposit(data, player)
         end
     end
@@ -96,14 +102,17 @@ if MoneyFromCreditCard and MoneyFromCreditCard.OnCreate then
 -- ============================================================
 -- GUARD 3: GetMoneyFromCard
 -- Original: getAllInputItems():get(0) can return nil; item:getType()
---           and item:getName() then crash.
+--           and item:getName() then crash. Recoverable -- log and skip.
 -- ============================================================
 
     local _origGetMoney = MoneyFromCreditCard.OnCreate.GetMoneyFromCard
     if _origGetMoney then
         MoneyFromCreditCard.OnCreate.GetMoneyFromCard = function(data, player)
             local item = data:getAllInputItems():get(0)
-            if not item then return end
+            if not item then
+                print("[MrTheSteve_Patches] MFCC GetMoneyFromCard: getAllInputItems():get(0) returned nil -- recipe data missing input item")
+                return
+            end
             _origGetMoney(data, player)
         end
     end
