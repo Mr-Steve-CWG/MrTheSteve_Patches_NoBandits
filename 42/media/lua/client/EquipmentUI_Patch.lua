@@ -1,5 +1,5 @@
 -- EquipmentUI_Patch.lua
--- Part of MrTheSteve_Patches_NoBandits
+-- Part of MrTheSteve_Patches
 --
 -- Patches: Equipment UI (Workshop: 2950902979)
 -- File:    42.13/media/lua/client/EquipmentUI/ClothingItemExtraService.lua
@@ -23,9 +23,11 @@
 --      If extraBodyLocation is nil, Lua raises "table index is nil".
 --
 -- Fix: replace both functions via the shared require table.
---   - getExtraItemBodyLocation: nil-check after instanceItem(), return nil
---     early, and use a false sentinel in the cache for missing items so the
---     guard fires correctly on subsequent calls without re-running instanceItem.
+--   - getExtraItemBodyLocation: if instanceItem() returns nil, the item
+--     type is unresolvable -- this means a clothing mod has a bad or missing
+--     item script (likely outdated or broken). We cache a false sentinel to
+--     avoid re-running instanceItem every frame, then call error() so
+--     ErrorMagnifier surfaces the offending item type and mod.
 --   - getBodyLocationsForItem: nil-check extraBodyLocation before assignment.
 -- ============================================================
 
@@ -37,7 +39,8 @@ local _patchedCache = {}
 
 function ClothingItemExtraService.getExtraItemBodyLocation(module, extra)
     local cached = _patchedCache[extra]
-    -- false sentinel = confirmed missing, nil = not yet looked up
+    -- false sentinel = confirmed missing, already reported via error() once this session.
+    -- Subsequent calls return nil silently to avoid spamming ErrorMagnifier every frame.
     if cached == false then
         return nil
     end
@@ -47,6 +50,7 @@ function ClothingItemExtraService.getExtraItemBodyLocation(module, extra)
     local item = instanceItem(module .. "." .. extra)
     if not item then
         _patchedCache[extra] = false
+        error("[MrTheSteve_Patches] EquipmentUI: unresolvable BodyLocation item '" .. module .. "." .. extra .. "' -- a clothing mod has a bad or missing item script (likely outdated). Check your clothing mods.")
         return nil
     end
     _patchedCache[extra] = item
