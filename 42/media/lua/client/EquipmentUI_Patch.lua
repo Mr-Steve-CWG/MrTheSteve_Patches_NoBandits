@@ -1,5 +1,5 @@
 -- EquipmentUI_Patch.lua
--- Part of MrTheSteve_Patches
+-- Part of MrTheSteve_Patches_NoBandits
 --
 -- Patches: Equipment UI (Workshop: 2950902979)
 -- File:    42.13/media/lua/client/EquipmentUI/ClothingItemExtraService.lua
