@@ -29,7 +29,7 @@ All non-Bandits patches mirror the main repo exactly:
 - WarThunder Vehicle Library (Workshop 3399660368) — HeliSoundUpdate, MainHeliCore, MainPanerCore
 - Lethal Stealth (Workshop 3531611692) — LTSProneGeneralHandler, LTSProneTimedAction, LTSPlayerProneStates, LTSCustomBuffs
 - MoneyFromCreditCard (Workshop 3428650803)
-- True MooZic (Workshop 3632610172) — TCTickCheckMusic
+- True MooZic (Workshop 3632610172) — retired 2026-04-30, upstream fixed
 - True Music Radio (Workshop 3631572046)
 - Lifestyle: Hobbies (Workshop 3403870858) — TVRADIOTraits_ISRadioInteractions
 - Aquatsar Yacht Club (Workshop 3646414716) — WaterNWindPhysics
@@ -39,4 +39,4 @@ All non-Bandits patches mirror the main repo exactly:
 
 ## Open Issues
 
-- **TCTickCheckMusic.lua** (True MooZic, 3632610172): Our version predates an upstream rework that switched vehicle audio from `vehicle:getEmitter()` to free world emitters anchored to vehicle position. Our nil guards and indexed iteration are equivalent to upstream's `TCMusic_ForEachVehicle`. Not a crash risk but could cause vehicle radio audio issues. Re-sync if vehicle radio audio misbehaves.
+None.
