@@ -32,7 +32,7 @@ All non-Bandits patches mirror the main repo exactly:
 - True MooZic (Workshop 3632610172) — retired 2026-04-30, upstream fixed
 - True Music Radio (Workshop 3631572046)
 - Lifestyle: Hobbies (Workshop 3403870858) — TVRADIOTraits_ISRadioInteractions
-- Aquatsar Yacht Club (Workshop 3646414716) — WaterNWindPhysics
+- Aquatsar Yacht Club (Workshop 3646414716) — retired 2026-04-30, upstream fixed
 - Translation patch (spawn point name keys)
 
 ## When a new patch is added to the main repo, check its scope. If it has no Bandits dependency, apply it here too.
