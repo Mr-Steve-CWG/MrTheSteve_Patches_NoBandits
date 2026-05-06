@@ -171,7 +171,7 @@ function PleaseKeepColor(craftRecipeData, character)
             character:setSecondaryHandItem(nil)
         end
 
-        -- Transfer items from old bag → new bag
+        -- Transfer items from old bag -> new bag
         local oldBagInv = backpack:getInventory()
         if oldBagInv then
             local oldBagItems = oldBagInv:getItems()
@@ -194,7 +194,7 @@ function PleaseKeepColor(craftRecipeData, character)
         end
     end
 
-    -- Copy the texture / color from old bag → new bag
+    -- Copy the texture / color from old bag -> new bag
     if backpackVisual and resultVisual then
         resultVisual:setTextureChoice(backpackVisual:getTextureChoice())
         resultItem:synchWithVisual()  -- finalize visuals

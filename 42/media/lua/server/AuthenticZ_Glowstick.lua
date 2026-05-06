@@ -2,7 +2,7 @@
 
 local lightByPlayer = {}
 
--- Each "On" glowstick type → an RGB color (0..1)
+-- Each "On" glowstick type -> an RGB color (0..1)
 local workingGlowSticksData = {
     ["AuthenticGlowstick_Blue_On"]   = { 0.0,  0.0,  1.0 },
     ["AuthenticGlowstick_Red_On"]    = { 1.0,  0.0,  0.0 },
