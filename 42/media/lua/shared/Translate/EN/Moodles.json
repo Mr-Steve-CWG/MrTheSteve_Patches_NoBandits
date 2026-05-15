@@ -188,9 +188,5 @@
     "Moodles_NoxiousSmell_desc_lvl1": "Sickness rate slightly elevated.",
     "Moodles_NoxiousSmell_desc_lvl2": "Sickness rate moderately elevated.",
     "Moodles_NoxiousSmell_desc_lvl3": "Sickness rate significantly elevated.",
-    "Moodles_NoxiousSmell_desc_lvl4": "Health declining rapidly. Move away immediately.",
-    "Moodles_trespassing_lvl1": "Trespassing",
-    "Moodles_trespassing_desc_lvl1": "You are trespassing on someone else's territory.",
-    "Moodles_Trespassing_lvl1": "Trespassing",
-    "Moodles_Trespassing_desc_lvl1": "You are trespassing on someone else's territory."
+    "Moodles_NoxiousSmell_desc_lvl4": "Health declining rapidly. Move away immediately."
 }
