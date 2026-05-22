@@ -205,6 +205,35 @@ Status: Active, ongoing. Additional missing keys are found in-game from time to 
 
 ---
 
+### Z-Proof Doors & Windows (Workshop ID 3684834906)
+
+Files: `42\media\lua\client\zombieThump.lua`, `42\media\lua\server\ZPWD\serverCommands.lua`
+Scope: Both repos. Method: Whole-file copies.
+
+| Fix | File | What it fixes |
+|-----|------|---------------|
+| Fix #1 | zombieThump.lua | `doesWindowBreak` called `window:getBarricadeForCharacter()` without guarding the result of `getWindow()` for nil. Window may be smashed or removed after phantom was created; door branch already had a nil check but window branch did not. |
+| Fix #2 | serverCommands.lua | `addPhantom` called `square:getObjects()` without guarding `getGridSquare()` for nil. At vehicle speed the square can unload between the client sending the command and the server processing it. |
+| Fix #3 | zombieThump.lua | `setSandboxVals` read all six `SandboxVars.CloudyZPWD.*` fields without fallback defaults. Nil flows into `ZombRand()` numeric comparisons in `didZombieGetBored` and throws on saves where sandbox options were never explicitly configured. |
+
+Bug report posted to Steam workshop page.
+
+---
+
+### Project Summer Car (Workshop ID 3564950449)
+
+File: `42\media\lua\server\PSC_Patch.lua`
+Scope: Both repos.
+
+| Fix | What it fixes |
+|-----|---------------|
+| Fix #1 | `Vehicles.CheckEngine.Engine` hard-sets engine condition to 0 for any vehicle whose PSC engine container has not been initialised yet (no `EnginePartInitMarker`). Requires 5 `EngineCritical`-tagged parts; finding fewer than 5 sets `minCondition = 0` and returns `false` (stall). Wrapper bails to vanilla `part:getCondition() > 0` if marker is absent. |
+| Fix #2 | `Vehicles.Update.Battery` computes `GetPartCondition("EngineAlternator")` = 0 on uninitialised vehicles, so `alternatorAmps = 0` and the battery drains continuously with nothing to offset it. Wrapper skips the entire function (no-op) until the marker is present. |
+
+Both conditions resolve permanently once the player enters the vehicle for the first time (PSC's `EngineSetupEnterVehicle` hook populates the container and stamps the marker). Safe without PSC: wrappers check that `Vehicles.CheckEngine.Engine` and `Vehicles.Update.Battery` are non-nil before installing; if PSC is not loaded the slots are never set and the wrappers are never registered.
+
+---
+
 ### Guns of Marz (Workshop ID 3722134990)
 
 File: `42\media\lua\client\GoM_VanillaConverter_Patch.lua`
