@@ -309,55 +309,53 @@ local function onFillInventoryObjectContextMenu(playerNum, context, items)
                     break
                 end
             end
-            if vanItem == nil then goto continue end
-
-            local hasMag = vanItem:getMagazine() ~= nil
-            local hasAttachment = false
-            local attachSlots = vanItem:getAttachmentSlotList()
-            if attachSlots ~= nil then
-                for i = 0, attachSlots:size() - 1 do
-                    local slot = attachSlots:get(i)
-                    if slot ~= nil and slot:getItem() ~= nil then
-                        hasAttachment = true
-                        break
+            if vanItem ~= nil then
+                local hasMag = vanItem:getMagazine() ~= nil
+                local hasAttachment = false
+                local attachSlots = vanItem:getAttachmentSlotList()
+                if attachSlots ~= nil then
+                    for i = 0, attachSlots:size() - 1 do
+                        local slot = attachSlots:get(i)
+                        if slot ~= nil and slot:getItem() ~= nil then
+                            hasAttachment = true
+                            break
+                        end
                     end
                 end
-            end
 
-            local label = "Convert " .. vanType:match("%.(.+)$") .. " -> GoM"
+                local label = "Convert " .. vanType:match("%.(.+)$") .. " -> GoM"
 
-            if hasMag or hasAttachment then
-                local blockMsg = "[GoM Converter] Remove "
-                if hasMag and hasAttachment then
-                    blockMsg = blockMsg .. "magazine and all attachments"
-                elseif hasMag then
-                    blockMsg = blockMsg .. "the magazine"
+                if hasMag or hasAttachment then
+                    local blockMsg = "[GoM Converter] Remove "
+                    if hasMag and hasAttachment then
+                        blockMsg = blockMsg .. "magazine and all attachments"
+                    elseif hasMag then
+                        blockMsg = blockMsg .. "the magazine"
+                    else
+                        blockMsg = blockMsg .. "all attachments"
+                    end
+                    blockMsg = blockMsg .. " from " .. vanType:match("%.(.+)$") .. " before converting."
+                    context:addOption(label .. " [BLOCKED]", player, function(p)
+                        p:Say(blockMsg)
+                    end)
                 else
-                    blockMsg = blockMsg .. "all attachments"
+                    local gomType = cfg.gom
+                    local mountType = cfg.mount
+                    context:addOption(label, player, function(p)
+                        local inv = p:getInventory()
+                        local srcItem = inv:getFirstTypeRecurse(vanType)
+                        if srcItem == nil then return end
+                        inv:Remove(srcItem)
+                        local newItem = inv:AddItem(gomType)
+                        if newItem ~= nil and instanceof(newItem, "HandWeapon") then
+                            transferCondition(srcItem, newItem)
+                        end
+                        if mountType ~= nil then
+                            addItem(p, mountType)
+                        end
+                    end)
                 end
-                blockMsg = blockMsg .. " from " .. vanType:match("%.(.+)$") .. " before converting."
-                context:addOption(label .. " [BLOCKED]", player, function(p)
-                    p:Say(blockMsg)
-                end)
-            else
-                local gomType = cfg.gom
-                local mountType = cfg.mount
-                context:addOption(label, player, function(p)
-                    local inv = p:getInventory()
-                    local srcItem = inv:getFirstTypeRecurse(vanType)
-                    if srcItem == nil then return end
-                    inv:Remove(srcItem)
-                    local newItem = inv:AddItem(gomType)
-                    if newItem ~= nil and instanceof(newItem, "HandWeapon") then
-                        transferCondition(srcItem, newItem)
-                    end
-                    if mountType ~= nil then
-                        addItem(p, mountType)
-                    end
-                end)
             end
-
-            ::continue::
         end
     end
 end
