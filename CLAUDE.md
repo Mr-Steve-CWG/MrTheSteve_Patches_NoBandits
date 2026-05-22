@@ -42,6 +42,22 @@ Repos use symlinks into the local mods directory — changes are live immediatel
 - Double-check every suspected bug by re-reading the code before reporting it
 - Confirm each bug is real — no false alarms, no speculative fixes
 
+**Translation fix workflow:**
+
+Before appending keys to any existing `Translate\EN\*.json` patch file, always scan that file first for PT/non-English contamination:
+
+```powershell
+Select-String -Path "<file>" -Pattern "Munição|Esteira|Blindagem|Assento|Antena|Galão|Pneu|Molde|Ferramenta|Chapa|Sapata|NÃO"
+```
+
+Then scan for duplicate keys before and after any edits:
+
+```powershell
+Select-String -Path "<file>" -Pattern '"Base\.' | ForEach-Object { ($_ -split '"')[1] } | Group-Object | Where-Object { $_.Count -gt 1 }
+```
+
+A duplicate key in any EN JSON file is a hard crash at menu load — the translator throws a JSONException and the UI never initializes. This bit us twice with the Military Tool Kit PT leak (April and May 2026): the April fix appended correct English keys without first removing the existing PT duplicates already in the file.
+
 ---
 
 ## Git Workflow
