@@ -5515,5 +5515,10 @@
     "Base.Military_Vehicle_Antenna": "Military Vehicle Antenna",
     "Base.Military_Vehicle_Antenna2": "Military Vehicle Antenna",
 
-    "Base.Military_PetrolCan_20L2": "Military Gas Can 20L"
+    "Base.Military_PetrolCan_20L2": "Military Gas Can 20L",
+
+    "Base.Browning_M2": "Browning M2HB",
+    "Base.145x114mmCarton": "14.5x114mm Ammo Box",
+    "Base.30x165mmCarton": "30x165mm Ammo Crate",
+    "Base.30x165mmHECarton": "30x165mm HE Ammo Crate"
 }
