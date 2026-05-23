@@ -133,18 +133,17 @@ local ammoBoxSubs = {
     ["ShotgunShellsBox"]    = { {"MarzGuns.12Gauge_Box_Buckshot",1} },
 }
 
--- Ammo cartons (Carton variants) - same GoM mappings as Box equivalents
+-- Ammo cartons (Carton variants) - map to GoM Crate equivalents for volume parity
 local ammoCartonSubs = {
-    ["Bullets9mmCarton"]    = { {"MarzGuns.9x19_Box",1} },
-    ["Bullets45Carton"]     = { {"MarzGuns.45_Box",1} },
-    ["556Carton"]           = { {"MarzGuns.223_Box",1},{"MarzGuns.556x45_Box",0.5},{"MarzGuns.545x39_Box",0.5},{"MarzGuns.762x39_Box",0.5},{"MarzGuns.9x39_Box",0.3} },
-    ["308Carton"]           = { {"MarzGuns.308_Box",1},{"MarzGuns.762x51_Box",0.5},{"MarzGuns.762x54_Box",0.5},{"MarzGuns.3006_Box",0.3} },
-    ["3030Carton"]          = { {"MarzGuns.3030_Box",1},{"MarzGuns.4570_Box",0.3} },
-    ["Bullets357Carton"]    = { {"MarzGuns.357_Box",1} },
-    ["Bullets38Carton"]     = { {"MarzGuns.38_Box",1} },
-    ["Bullets44Carton"]     = { {"MarzGuns.44_Box",1},{"MarzGuns.50_Box",0.5} },
-    ["Bullets45Carton"]     = { {"MarzGuns.45_Box",1} },
-    ["ShotgunShellsCarton"] = { {"MarzGuns.12Gauge_Box_Buckshot",1} },
+    ["Bullets9mmCarton"]    = { {"MarzGuns.9x19_Crate",1} },
+    ["Bullets45Carton"]     = { {"MarzGuns.45_Crate",1} },
+    ["556Carton"]           = { {"MarzGuns.223_Crate",1},{"MarzGuns.556x45_Crate",0.5},{"MarzGuns.545x39_Crate",0.5},{"MarzGuns.762x39_Crate",0.5},{"MarzGuns.9x39_Crate",0.3} },
+    ["308Carton"]           = { {"MarzGuns.308_Crate",1},{"MarzGuns.762x51_Crate",0.5},{"MarzGuns.762x54_Crate",0.5},{"MarzGuns.3006_Crate",0.3} },
+    ["3030Carton"]          = { {"MarzGuns.3030_Crate",1},{"MarzGuns.4570_Crate",0.3} },
+    ["Bullets357Carton"]    = { {"MarzGuns.357_Crate",1} },
+    ["Bullets38Carton"]     = { {"MarzGuns.38_Crate",1} },
+    ["Bullets44Carton"]     = { {"MarzGuns.44_Crate",1},{"MarzGuns.50_Crate",0.5} },
+    ["ShotgunShellsCarton"] = { {"MarzGuns.12Gauge_Crate_Buckshot",1} },
 }
 
 -- Loose rounds
