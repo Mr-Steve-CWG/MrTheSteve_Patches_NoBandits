@@ -15,17 +15,25 @@
 -- initialised this engine" flag) is absent from the container, bail out and call
 -- the original function instead.
 --
+-- NOTE: container:containsTag() requires a Java ItemTag object, not a string.
+-- PSC registers its tags via ItemTag.register() in registries.lua into the global
+-- ProjectSummerCar_Tags table. isEngineInitialised() reads from that table so
+-- the correct ItemTag object is passed to containsTag().
+--
 -- Safe without PSC: the wrappers check that Vehicles.CheckEngine.Engine and
 -- Vehicles.Update.Battery exist and are non-nil before installing themselves.
 -- If PSC is not loaded those slots are never populated, the wrappers are never
--- registered, and vanilla behaviour is untouched.
+-- registered, and vanilla behaviour is untouched. The ProjectSummerCar_Tags
+-- nil guard inside isEngineInitialised() provides a secondary safety net.
 
 local function isEngineInitialised(vehicle)
     local engine = vehicle:getPartById("Engine")
     if not engine then return false end
     local container = engine:getItemContainer()
     if not container then return false end
-    return container:containsTag("EnginePartInitMarker")
+    local pscTags = ProjectSummerCar_Tags
+    if not (pscTags and pscTags.EnginePartInitMarker) then return false end
+    return container:containsTag(pscTags.EnginePartInitMarker)
 end
 
 -- Wrap Vehicles.CheckEngine.Engine
