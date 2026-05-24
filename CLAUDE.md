@@ -79,9 +79,12 @@ Stage only the specific files that changed. Commit after every meaningful change
 
 ### Bandits (Workshop ID 3268487204)
 
-Files: `42\media\lua\shared\Bandits_Patch.lua`, `42\media\lua\server\Bandits_Server_Patch.lua`Scope: Main repo only (Bandits-specific).
+Files: `42\media\lua\shared\Bandits_Patch.lua`, `42\media\lua\server\Bandits_Server_Patch.lua`, `42\media\lua\client\BanditUpdate_Patch.lua`
+Scope: Main repo only (Bandits-specific).
 
-FixWhat it fixesStatusFix #1`spawnPoint` typo (should be `spawnPoints`) in `Spawner.Individual` — nil index crashActiveFix #3`ApplyVisuals` throttle — performance fix, our addition, not an upstream bugActiveFix #4`ManageCollisions` — `getBarricadeOnOppositeSquare` return unguarded, nil coord accessActiveFix #5`ans ==` typo in `BanditUpdate.lua` (should be `asn ==`)ActiveFix #2nil return from `generateSpawnPointUniform`Retired — fixed upstream (42.16.x)Fix #6`BanditServerCommands` `sendObjectChange('state')` B42 API crashRetired — fixed upstreamFix #7`BanditBasePlacements` window patch / `BanditServerSpawner` sendObjectChangeRetired — fixed upstream
+FixWhat it fixesStatusFix #1`spawnPoint` typo (should be `spawnPoints`) in `Spawner.Individual` — nil index crashActiveFix #3`ApplyVisuals` throttle — performance fix, our addition, not an upstream bugActiveFix #4`ManageCollisions` — `getBarricadeOnOppositeSquare` return unguarded, nil coord access — door **and** window pathsActiveFix #5`ans ==` typo in `BanditUpdate.lua` (should be `asn ==`)ActiveFix (ManageEndurance)`getSpecificPlayer(0)` returns nil during early singleplayer startup; calling `:getX()` on nil crashes. Added nil guard with early return `{}`.ActiveFix #2nil return from `generateSpawnPointUniform`Retired — fixed upstream (42.16.x)Fix #6`BanditServerCommands` `sendObjectChange('state')` B42 API crashRetired — fixed upstreamFix #7`BanditBasePlacements` window patch / `BanditServerSpawner` sendObjectChangeRetired — fixed upstream
+
+Fixes #4, #5, and ManageEndurance implemented as a whole-file copy `BanditUpdate_Patch.lua` synced against 42.18 upstream. Bandits_Patch.lua handles monkey patches only (Fixes #1, #3).
 
 Fixes #2, #6, #7 retired at commit `05dd628`.
 
@@ -177,7 +180,7 @@ FixFileWhat it fixesFix #1TCTickCheckMusic.luaWhole-file copy predating upstream
 
 File: `42\media\lua\client\TrueMusicRadio_Patch.lua`Scope: Both repos.
 
-FixWhat it fixesFix #1`TMRadio.prettyName` nil crash — `getItemNameFromFullType()` returns null when content pack doesn't declare `module Tsarcraft`; nil then passed to `gsub()`
+FixWhat it fixesFix #1`TMRadio.prettyName` nil crash — `getItemNameFromFullType()` returns nil when the song's item type doesn't exist (content pack not installed). Nil is passed directly to `:gsub()`, throwing "attempted index: gsub of non-table: null" on every UI update tick. Wrapper returns `""` for nil display names so the radio UI shows nothing rather than crashing.
 
 ---
 
@@ -245,8 +248,20 @@ Scope: Both repos.
 |-----|---------------|
 | Fix #1 | `Vehicles.CheckEngine.Engine` hard-sets engine condition to 0 for any vehicle whose PSC engine container has not been initialised yet (no `EnginePartInitMarker`). Requires 5 `EngineCritical`-tagged parts; finding fewer than 5 sets `minCondition = 0` and returns `false` (stall). Wrapper bails to vanilla `part:getCondition() > 0` if marker is absent. |
 | Fix #2 | `Vehicles.Update.Battery` computes `GetPartCondition("EngineAlternator")` = 0 on uninitialised vehicles, so `alternatorAmps = 0` and the battery drains continuously with nothing to offset it. Wrapper skips the entire function (no-op) until the marker is present. |
+| Fix #3 | `isEngineInitialised` originally called `container:containsTag("EnginePartInitMarker")` with a raw string. `ItemContainer:containsTag()` is a Java method that requires an `ItemTag` object, not a string — threw `expected argument of type ItemTag, got String`. Fixed to use `ProjectSummerCar_Tags.EnginePartInitMarker` (the registered `ItemTag` object from PSC's `registries.lua`). Added nil guard on `ProjectSummerCar_Tags` itself as a secondary safety net. |
 
 Both conditions resolve permanently once the player enters the vehicle for the first time (PSC's `EngineSetupEnterVehicle` hook populates the container and stamps the marker). Safe without PSC: wrappers check that `Vehicles.CheckEngine.Engine` and `Vehicles.Update.Battery` are non-nil before installing; if PSC is not loaded the slots are never set and the wrappers are never registered.
+
+---
+
+### Zombies Drop Ammo Boxes (Workshop ID 3700723031)
+
+File: `42\media\lua\server\AmmoLootDropBox.lua`
+Scope: Both repos. Method: Whole-file copy.
+
+| Fix | What it fixes |
+|-----|---------------|
+| Fix #1 | `isAmmoBoxItem` builds a `combined` string by concatenating `fullName` with three other values. `getItemFullName` returns `item:getFullName()` directly — for vehicle part items this is a Java object, not a Lua string, and `..` throws `__concat not defined`. Crash happens inside `buildAmmoBoxPool` on world load, so the pool never builds and zombies never drop ammo boxes for the session. Fixed by wrapping `fullName` in `tostring()`. |
 
 ---
 
@@ -258,13 +273,41 @@ Scope: Both repos. Soft dependency — only engages when `GunsOfMarz` is in the 
 | Fix | What it fixes |
 |-----|---------------|
 | Fix #1 | Right-click context menu on vanilla weapons, ammo, attachments, and magazines to convert them to GoM equivalents. GoM strips vanilla guns/ammo from loot tables at load time, but runtime injection (airdrops, military mods, zone mods) can still produce them. Client-side `OnFillInventoryObjectContextMenu` hook. Single-option ammo converts directly; multi-option calibers (5.56, .308, 12ga) use a submenu. Gun conversions transfer condition proportionally and produce the appropriate mount; blocked with a chat message if magazine is loaded or attachments are mounted. Random attachment picks (scopes, lasers, lights) resolved at click time. |
+| Fix #2 | Gun loop used `goto continue` / `::continue::` (Lua 5.2 syntax) to skip entries where the item object couldn't be found. Kahlua parses `goto` as a variable name and throws a syntax error on load, preventing the entire file from compiling. Replaced with `if vanItem ~= nil then ... end` block. |
 
 **Vanilla item name notes:** 9mm/45/38/357/44 loose rounds use `Bullets9mm` / `Bullets45` etc. prefix (not `9mmBullets`). Shotgun box/carton are `ShotgunShellsBox` / `ShotgunShellsCarton`.
 
 ---
 
+### Neat Rocco (Workshop ID 3723726293)
+
+File: `42\media\lua\client\NeatRocco\NR_CharInfo\NR_CharInfoPanel.lua`
+Scope: Both repos. Method: Whole-file copy.
+
+| Fix | What it fixes |
+|-----|---------------|
+| Fix #1 | `NR_CharInfoPanel.setWidth` called `header:calculateLayout()` unconditionally on every invocation. Both `ISCharacterScreen:render()` (Info tab) and `ISHealthPanel:update()` (Health tab) call `setWidthAndParentWidth()` every frame, which propagates up to `setWidth`. `calculateLayout` iterates every cell, column, and row of the ISTableLayout header geometry -- running it every frame caused 1000ms+ spikes while the character info window was open. Fixed by capturing `panel.width` before the call and only calling `calculateLayout` when `actualW ~= prevW`. |
+
+---
+
+### AnruisiTown x Guns of Marz Compatibility
+
+File: `42\media\lua\server\AnruisiTown_MarzCompat.lua`
+Scope: Both repos.
+
+Root cause: Marz's `Distribution.Insert` / `RemoveMany` (in `Gunworks_gang_framework`, workshop ID 3722064198) iterates only one level into each loot table, checking `data.items` directly. AnruisiTown's `SuburbsDistributions` rooms use a nested structure (`room -> container_type -> items`), so Marz never sees them. Zero stripping, zero injection -- all AnruisiTown gun/ammo rooms remained vanilla.
+
+This mod runs on `OnPostDistributionMerge` and handles substitution directly for AnruisiTown's weapon/ammo/attachment rooms. For each vanilla item found, GoM equivalents are inserted at `vanilla_weight * marz_chance`, mirroring Marz's own behaviour. Sandbox flags respected via the same `Enable_<WeaponName>` check Marz uses.
+
+Rooms covered: `GUNxxx`, `A625GUNXXX`, `A625GUNXXX2`, `AM16GUNXXX`, `A12GUNXXX`, `GUNKK`, `armyBarracks`, `dabaokkk`, `SSS`, `qiangxiepeijia`.
+
+**Known gap**: The large warehouse on the south edge of the map (likely room name `warehouse`) was not confirmed in-game. Check with `/lua print(getCell():getGridSquare(...):getRoom():getName())` on the ammo floor and add the room to this mod if needed.
+
+---
+
 ## B42 Gotchas
 
+- `goto` / `::label::` are Lua 5.2 syntax -- Kahlua (PZ's VM) does not support them. The parser treats `goto` as a variable name and throws `'=' expected near 'continue'`. Replace with `if condition then ... end` blocks.
 - `sendObjectChange('state')` crashes in B42 — use `IsoObjectChange.STATE`
 - Java collections use `:size()` / `:get(i)` with 0-based indexing, not Lua `#` / `[]`
 - `isServer()` and `isClient()` are mutually exclusive; neither is true in singleplayer
@@ -296,8 +339,9 @@ Things explicitly decided against — do not relitigate without new information.
 - `edit_block` for targeted replacements; fall back to `write_file` for large rewrites where `edit_block` stalls silently
 - `read_file` with `offset` and `length` is more reliable than `start_search` context lines for verifying exact call signatures
 - Prefer asking Steve to run PowerShell for log parsing, directory listings, file searches — saves context tokens
-- **Git is not on PATH by default in Desktop Commander PowerShell sessions.** Full path: `C:\Program Files\Git\bin\git.exe`. Use `$git = "C:\Program Files\Git\bin\git.exe"; & $git ...` pattern, or ask Steve to add it permanently: `[System.Environment]::SetEnvironmentVariable("PATH", $env:PATH + ";C:\Program Files\Git\bin", [System.EnvironmentVariableTarget]::User)`
-- **Python is at `C:\Python314\python.exe`.** Not on PATH in Desktop Commander sessions. Use full path: `& "C:\Python314\python.exe" script.py`
+- **Git is not on PATH by default in Desktop Commander PowerShell sessions.** Full path: `C:\Program Files\Git\bin\git.exe`. Use bat files (cmd.exe /c) for git ops and output capture.
+- **Python is at `C:\Python314\python.exe`.** Not on PATH in Desktop Commander sessions. Use full path.
+- **When giving Steve raw PowerShell commands**, always prefix executable paths with `&` — e.g. `& "C:\Program Files\Git\bin\git.exe" add ...`. Without `&`, PowerShell throws `UnexpectedToken` on the arguments.
 
 ---
 
@@ -342,7 +386,7 @@ DTV2 expected behavior when an NPC dies or despawns before DTV2 records a UUID f
 
 ## Open Issues
 
-- **BanditUpdate_Patch.lua** (Bandits, 3268487204): Upstream Apr 26 update ("some 42.17 improvements") changed the IsoProperties API from `:Is()`/`:Val()` to `:has()`/`:get()` throughout BanditUpdate.lua. Our patch still uses the old API — fine on 42.16.3, likely broken on 42.17+. ManageCollisions, escape/retreat logic, and `becomeCorpse()` were also reworked. Full re-sync required before running Bandits on 42.17+; Fixes #4 and #5 must be carried forward into the new code.
+- **Military Tool Kit non-ASCII Lua comments**: Multiple Lua files under `42\media\lua\Client\` contain Portuguese comments with non-ASCII characters causing a non-fatal Kahlua lexer error on load (`ErrorMagnifier: ArrayIndexOutOfBoundsException: Index 65022`). Whole-file copies with ASCII substitutions are ineffective because PZ loads workshop originals regardless. Bug reported to mod author. No action until upstream fix.
 
 ---
 
