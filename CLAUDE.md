@@ -315,6 +315,8 @@ Rooms covered: `GUNxxx`, `A625GUNXXX`, `A625GUNXXX2`, `AM16GUNXXX`, `A12GUNXXX`,
 - `SandboxVars` fields can be nil if the option was never set — always provide a fallback
 - Upstream mod updates appear in Steam patch notes before files actually download — always verify workshop files have refreshed before auditing
 - UI null pointer crashes in the Bandits Creator avatar preview are visual-only (invalid B42 body location slot names) — do not affect gameplay or saved configs
+- `getCell()` can return nil transiently in B42 in `OnTick`, `OnPlayerUpdate`, and `EveryOneMinute` callbacks. Nil guards on `getCell()` in these contexts are correct behavior, not error suppression -- the polling loop safely skips a frame.
+- Never use `pcall` in B42 Lua patches. Kahlua does not reliably expose it as a global. Use explicit nil and method-existence guards instead: `foo and foo.bar ~= nil`.
 
 ---
 
@@ -326,7 +328,6 @@ Things explicitly decided against — do not relitigate without new information.
 - **No full directory listing baked into this file.** Listings go stale. Run fresh on demand when needed.
 - **No permanent function map in this file.** Generate on demand via PowerShell scan if load order or conflict investigation requires it.
 - **NoBandits [CLAUDE.md](http://CLAUDE.md) contains delta notes only.** Canonical context lives here.
-- **Use Python for all file manipulation scripts, not PowerShell.** PowerShell has consistent encoding and escaping issues with Unicode, string replacement, and multi-line heredocs that cause silent failures. Python handles all of these reliably. Deliver scripts as downloadable .py files; run with `python script.py` from PowerShell.
 - **Use Python for all file manipulation scripts, not PowerShell.** PowerShell has consistent encoding and escaping issues with Unicode, string replacement, and multi-line heredocs that cause silent failures. Python handles all of these reliably. Deliver scripts as downloadable .py files; run with `python script.py` from PowerShell.
 - **Retire patches when the upstream author fixes what we fixed.** Even if their approach differs from ours, if the crash or bug is addressed upstream, remove our patch and let them maintain it. If something new breaks, address it fresh. Carrying diverged whole-file copies against an actively maintained mod creates ongoing burden with no benefit.
 
