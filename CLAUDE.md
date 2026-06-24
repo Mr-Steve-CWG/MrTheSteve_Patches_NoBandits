@@ -327,7 +327,7 @@ Things explicitly decided against — do not relitigate without new information.
 - **No hash-based change detection.** Maintenance overhead too high; stale hashes are worse than no hashes. Check workshop file dates or re-read source when upstream changes are suspected.
 - **No full directory listing baked into this file.** Listings go stale. Run fresh on demand when needed.
 - **No permanent function map in this file.** Generate on demand via PowerShell scan if load order or conflict investigation requires it.
-- **NoBandits [CLAUDE.md](http://CLAUDE.md) contains delta notes only.** Canonical context lives here.
+- **NoBandits CLAUDE.md is a near-full copy of the main repo CLAUDE.md, minus Bandits-specific entries.** Keep both in sync when adding gotchas, decisions, or tooling notes.
 - **Use Python for all file manipulation scripts, not PowerShell.** PowerShell has consistent encoding and escaping issues with Unicode, string replacement, and multi-line heredocs that cause silent failures. Python handles all of these reliably. Deliver scripts as downloadable .py files; run with `python script.py` from PowerShell.
 - **Retire patches when the upstream author fixes what we fixed.** Even if their approach differs from ours, if the crash or bug is addressed upstream, remove our patch and let them maintain it. If something new breaks, address it fresh. Carrying diverged whole-file copies against an actively maintained mod creates ongoing burden with no benefit.
 
