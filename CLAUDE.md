@@ -320,6 +320,28 @@ Rooms covered: `GUNxxx`, `A625GUNXXX`, `A625GUNXXX2`, `AM16GUNXXX`, `A12GUNXXX`,
 
 ---
 
+## 42.20 Engine Audit (CFR decompile, July 2026)
+
+Build 42.20 is the full B42 Stable launch (map doubled, town rebuilds, lighting overhaul, animal husbandry, deeper crafting). Confirmed via targeted CFR decompile of `projectzomboid.jar` (git revision `a2947723ca`) that this was a content/art overhaul, not an engine rework -- all previously documented B42 gotchas and patch assumptions below were checked directly against 42.20 source and hold unchanged unless noted otherwise.
+
+**Confirmed unchanged in 42.20 (verified against decompiled source, not just inference):**
+- `LootRespawn.respawnInChunk` still gates on exact string match against `TownZone`/`TownZones`/`TrailerPark` only (`zombie.LootRespawn`). AnruisiTown loot respawn gap analysis is still fully valid.
+- `Events.OnAddItemToInventory` still does not exist (checked full `zombie.Lua.LuaEventManager.AddEvents()` list).
+- `pcall` is not registered as a Lua global anywhere in `zombie.Lua.LuaManager`. All internal `pcall` usage is Java-side (`LuaCaller.pcall`), never exposed to mod scripts.
+- `ActiveMods.isModActive()` (backing `getActivatedMods():contains()`) is still a plain exact-string `.contains()` check, trimmed but not normalized. No change here, though moot now that the HDX server is shut down.
+- `SandboxVars.ModID.Option` can still be nil if the mod's custom sandbox option was never explicitly set, regardless of registration format.
+
+**New in 42.20, not previously documented:**
+- New Lua events: `OnClickedAnimalForContext`, `OnAnimalTracks` (animal husbandry hooks), `OnWeaponHitThumpable`, `OnPlayerGetDamage`, `OnDeadBodySpawn`, `OnSleepingTick`, plus a set of pre-registration events (`preAddItemDefs`, `preAddSkillDefs`, `preAddZoneDefs`, `preAddCatDefs`, `preAddForageDefs`) that may be cleaner extension points than monkey patching for future compat work.
+- Full animal genetics/breeding simulation under `zombie.characters.animals` (`AnimalAllele`, `AnimalGene`, `AnimalGenomeDefinitions`, population/migration managers). Not decoration -- a real simulation layer. Relevant if any future mod touches animals or livestock.
+- Mod-defined sandbox options can now be registered via a `media/sandbox-options.txt` file (parsed by `zombie.sandbox.CustomSandboxOptions`) alongside the older Lua-table style. Doesn't change the nil-fallback gotcha above.
+- `zombie.buildingRooms` is the in-game Building Rooms Editor dev tool, not the runtime loot/room distribution system -- a dead end for room-name investigation, don't go looking there again.
+
+**Open question needing verification (not yet confirmed against actual patch file):**
+- `Item.getTags()` returns `Set<ItemTag>`, and `Item.hasTag(ItemTag)` does a plain `.contains()` against it. Because of Java generic erasure, calling `getTags():add("SomeString")` from Lua compiles and silently inserts a raw String into the set -- it will never satisfy `hasTag(ItemTag.X)` anywhere in vanilla or other mods' Java-side checks, since a String never equals an ItemTag instance. `PickAramidThread` is confirmed as a real, natively-registered vanilla `ItemTag` (`ItemTag.registerBase("PickAramidThread")` in `zombie.scripting.objects.ItemTag`), not a custom tag we invented. If `PickAramidThread_ModCompat.lua` adds the tag as a raw string rather than via `ItemTag.get(ResourceLocation.get("PickAramidThread"))`, it may not interoperate with anything checking the real vanilla tag. Needs a direct read of that patch file to confirm which form it uses before concluding anything is actually broken.
+
+---
+
 ## Decisions Log
 
 Things explicitly decided against — do not relitigate without new information.
