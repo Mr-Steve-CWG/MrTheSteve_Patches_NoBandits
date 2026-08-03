@@ -330,7 +330,35 @@ Unrelated note: a separate workshop mod, AnruisiTownGGSCompat (3677782030), also
 
 ---
 
-## B42 Gotchas
+### HellDrinx-derived fixes (author semi-retiring, carried over 2026-08-02)
+
+Workshop 3667630656 bundles four mods by author Reegold: HellDrinxEssentials, HellDrinxBugFixes, HellDrinxTranslations, and a bonus TACDeltaPatched. The author is semi-retiring and won't be updating any of them further. None of the three core HellDrinx mods are in the current 42.20 active mod list (TACDeltaPatched is active but its `require=HellDrinxEssentials,HellDrinxBugFixes` isn't satisfied -- Steve confirmed it's working anyway; addressing separately, not through this repo).
+
+Reviewed every fix in HellDrinxBugFixes. Skipped anything targeting Bandits/BWO (not applicable, NoBandits), anything targeting mods not in the active list (Storylines), the two dedicated-MP-only diagnostics (HP forensics, phantom vehicle detector -- don't apply to solo play), and the ukr_melee_42 spawn-rate multiplier (Steve confirmed the mod's own 42.20 update already adjusted loot rates with proper sandbox settings, this patch is redundant now).
+
+Before porting each of the following, re-confirmed the underlying bug still exists by reading the *current* version of the target mod/vanilla file on disk -- not just trusting HellDrinx's original writeup:
+
+#### FR_RequirePaths_Patch.lua (client)
+Patches Filibuster Rhymes' Used Cars (Workshop 3683878228, `B42FRUsedCarsAnimAlpha`). Confirmed all four broken require() paths are still wrong in the current mod source (verified against actual vanilla file locations): `Vehicle/ISVehiclePartMenu`, `ISUI/ISVehicleMechanics`, `Vehicles/ISUI/ISVehicleTrailerUtils`, `ISUnlockVehicleDoor`. Re-applies FR's own patches manually on `OnGameBoot` since the require() failures silently skip them at load time.
+
+#### SOTO_TransferValue_Patch.lua (client)
+Patches Simple Overhaul: Traits and Occupations (Workshop 2840805724). Confirmed `SOTOISInventoryTransferAction.lua` (42.15 folder, currently active version) still does raw arithmetic on `DisorganizedTransferredValue`/`AllThumbsTransferredValue` ModData fields with no init guard. Wraps `perform()`/`update()` to zero-init both fields first.
+
+#### JG_UmbrellaCorp_BodyLocation_Patch.lua (shared)
+Patches `[J&G] Umbrella Corp Uniform` (Workshop 3675741487). Confirmed both winter jacket items still declare bare `JacketHat` (no namespace) across every version folder on disk. Registers `JG:JacketHat` as a proper `ItemBodyLocation` and adds it to the Human body location group.
+
+#### ISWearClothing_NilItem_Patch.lua (shared)
+Patches vanilla `ISWearClothing.lua`. Confirmed current 42.20 vanilla source still calls `self:isAlreadyEquipped(self.item)` right after a nil-capable inventory re-fetch, with no guard inside `isAlreadyEquipped` before `self.item:hasTag(...)`. Race is triggered by mods that chain-patch `ISInventoryTransferAction:perform` -- SOTO and ETW both do, and are both active. Adds the nil guard.
+
+#### MapSpawnSelectScroll_Patch.lua (client)
+Patches vanilla `MapSpawnSelect` (character creation map/spawn picker). Not mod-specific -- relevant purely because of how many map mods are installed here. Fixes the listbox never enabling scroll because height and scrollHeight end up equal.
+
+#### RVInterior_SwitchSeat_Patch.lua (client)
+Patches PROJECT RV Interior (Workshop 3543229299) and vanilla `ISVehicleDashboard`. Confirmed current vanilla `ISVehicleDashboard.lua` still calls `vehicle:isDriver(character)` with no nil check right after `getVehicle()` -- crash during the interior/vehicle transition. Also confirmed current `RVClientSP.lua`'s `ReturnPlayerToSeat` still searches only a 1-tile radius with no attempt cap, causing an infinite retry loop and a stuck player on large RVs. Fix widens the search to radius 4, adds a 300-tick timeout, and verifies the found vehicle is a registered RV type. Note: the original HellDrinx fix also covered Project Summer Car's dashboard replacer for the same crash; omitted here since PSC's patch is retired -- re-add if PSC ever comes back.
+
+**Archived, not deployed:** `_archive\LifestyleHobbies_pending42.20\` holds `HD_Fix_LFH_ToiletMenu.lua` and `HD_Fix_Lifestyle_NilModData.lua`, both targeting Lifestyle: Hobbies (3403870858), which is subscribed but not in the active 42.20 mod list (not yet updated for 42.20). Kept for reference in case the mod update doesn't address these itself. `HD_Fix_Lifestyle_NilModData.lua` uses `pcall` in one spot -- flagged in-file as needing replacement with explicit guards before ever actually deploying it, per house rule.
+
+---
 
 - `goto` / `::label::` are Lua 5.2 syntax -- Kahlua (PZ's VM) does not support them. The parser treats `goto` as a variable name and throws `'=' expected near 'continue'`. Replace with `if condition then ... end` blocks.
 - `sendObjectChange('state')` crashes in B42 — use `IsoObjectChange.STATE`
