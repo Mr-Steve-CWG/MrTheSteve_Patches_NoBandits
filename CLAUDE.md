@@ -23,6 +23,26 @@ PurposePathWorkshop content root`C:\Steam\steamapps\workshop\content\108600\`Ban
 
 Repos use symlinks into the local mods directory — changes are live immediately. Patch file structure mirrors PZ layout: `42\media\lua\client\`, `shared\`, `server\`
 
+**Note (2026-08-02):** The NoBandits repo's link into `C:\Users\steve\Zomboid\mods\` was recreated as a directory junction (`mklink /J`), not a true symlink (`mklink /D`) — Desktop Commander's shell session didn't have the elevated privilege `/D` needs. Functionally equivalent for PZ's mod loader and for live-editing purposes. If a true symlink is ever needed, run `mklink /D` from an elevated prompt instead.
+
+---
+
+## Session Log — 2026-08-02: 42.20 fresh solo restart, NoBandits redeploy
+
+Steve moved to a fresh solo playthrough on PZ 42.20 (full stable, launched 2026-07-29). No saves carried over, mod list has changed significantly, and Bandits/BanditsWeekOne are fully unsubscribed (workshop folders no longer exist on disk). Confirmed this is genuinely a NoBandits situation, not just a load-order gap.
+
+Rather than trust the stale `mod_audit.json` (last regenerated June 19, pre-restart), pulled the actual active mod list straight from the live save's `mods.txt` (`Saves\Apocalypse\2026-08-02_17-22-57\mods.txt`) and cross-referenced every patch in this repo's inventory against it plus the current workshop folders on disk. Results:
+
+- **Retired and archived to `_archive\`** (mod fully unsubscribed, workshop folder gone): BBHide, AZAS Frequency Conflict, Lethal Stealth, MoneyFromCreditCard, True Music Radio, Project Summer Car. Moved rather than deleted per Steve's preference — restorable if any of these mods come back. Corresponding stale `loadModAfter` entries stripped from `mod.info`.
+- **Still subscribed, currently inactive** (not retired, just not in the current save's mod list): Lifestyle: Hobbies, Neat Rocco (also capped `versionMax=42.19` in its own `mod.info` — likely why it's not running on 42.20).
+- **Confirmed still active and relevant**: Military Tool Kit, Z-Proof (Doors & Windows), Zombies Drop Ammo Boxes, True MooZic, Guns of Marz + SWMG framework, AnruisiTown x GoM Compatibility.
+- Repo relinked into `C:\Users\steve\Zomboid\mods\` (see junction note above).
+
+**Loose ends spotted, not part of this session's scope, flagging for Steve:**
+- `client\AuthenticZ_Zones.lua` isn't in the Active Patch Inventory above despite being in the repo. Content is mostly custom `getWorld():registerZone(...)` calls for immersion (movie-referenced zombie zone names across the map) plus an `RWMVolume:verifyItem` radio-headphone check and a bag-color-transfer craft helper — none of it documented as a fix for a specific mod bug. Steve mentioned switching from full Authentic Z to the Backpacks+-only variant; the headphone check references `AuthenticZClothing.Authentic_Headphones`/`_Headphones2`, which live under the full mod's item module, not `AuthenticZBackpacksPlus`. With only Backpacks+ active, that check is now inert (harmless, just won't match) rather than broken. Not touched — needs Steve's call on whether to keep, prune, or fold into documented inventory.
+- `client\Chainsaw\ChainsawMain.lua` and `shared\Chainsaw\ChainsawAPI.lua` also aren't in the inventory. Not reviewed this session.
+- `client\LSEffects\LSPerTick.lua` also undocumented. Not reviewed this session.
+
 ---
 
 ## Core Rules
@@ -105,23 +125,17 @@ FixWhat it fixesFix #1`OutputFilesoundtable.lua` saved as UTF-16 LE — Kahlua l
 
 ### BBHide (Workshop ID 3705453209)
 
-Files: `42\media\lua\client\BBHide\`, `42\media\lua\shared\BBHide\`Scope: Both repos.
-
-FixWhat it fixesFix #1`distanceBetween` missing `math.abs` wrapperFix #2`Cold` effectType referenceFix #3Nil texture guard in `DrawHideCanvas` before first hideFix #4Stray `return TimeAction` at end of `BB_Hide_ISTimedAction.lua`
-
-Committed as `82ae07f`.
+~~Files: `42\media\lua\client\BBHide\`, `42\media\lua\shared\BBHide\`~~
+Scope: Both repos.
+Status: **Retired 2026-08-02.** Mod fully unsubscribed (workshop folder no longer exists on disk) as of the 42.20 fresh solo restart. Moved to `_archive\BBHide_client\` and `_archive\BBHide_shared\` in this repo rather than deleted, per Steve's call — restorable if the mod comes back.
 
 ---
 
 ### AZAS Frequency Conflict Patch (Workshop ID 3655362047 / 3656359964)
 
-File: `42\media\lua\shared\AZAS_FrequencyConflict_Patch.lua`Scope: Both repos.
-
-Pre-seeds `AZAS_FrequencyIndex.mapping` before `FI.apply()` runs to resolve collisions between AZAS Frequency Index stations from different sub-mods of workshop ID 3656359964.
-
-StationOriginalPatchedSURVIVOR RADIO (Just Music)8800087800Gallatin Underground8800087600KM-FM All Country (Just Music)8820087400Classical for the Dead140000140200
-
-NMR Legacy (88000), Echo Station (88200), and Reverend Dan (140000) keep originals. Fails gracefully if any of these mods are not active — missing AZAS_STATIONS entries are harmless no-ops. `loadModAfter=AZASFrequencyIndex_RefactorTest` added to both [mod.info](http://mod.info) files.
+~~File: `42\media\lua\shared\AZAS_FrequencyConflict_Patch.lua`~~
+Scope: Both repos.
+Status: **Retired 2026-08-02.** Mod fully unsubscribed as of the 42.20 fresh solo restart. Moved to `_archive\AZAS_FrequencyConflict_Patch.lua`. `loadModAfter=AZASFrequencyIndex_RefactorTest` stripped from `mod.info`.
 
 ---
 
@@ -153,17 +167,17 @@ Status: **Retired 2026-05-09.** Mods dropped from modlist; not yet compatible wi
 
 ### Lethal Stealth (Workshop ID 3531611692)
 
-Files: `42\media\lua\client\LTSProneGeneralHandler.lua`, `42\media\lua\shared\LTSProneTimedAction.lua`, `42\media\lua\shared\LTSPlayerProneStates.lua`, `42\media\lua\shared\LTSBuffs\LTSCustomBuffs.lua`Scope: Both repos. Method: Whole-file copies with inline fix markers.
-
-FixFileWhat it fixesFix #1LTSProneTimedAction.lua`getDuration` instant-action branch — `baseTime` was unconditionally overwritten on the next line, making the cheat-speed branch dead codeFix #2LTSProneGeneralHandler.lua / LTSCustomBuffs.luaRemoved debug `print()` calls — fired on every prone toggle and every buff removal respectivelyFix #3LTSPlayerProneStates.luaCopy-paste bug in `isPlayerProneInFrontVehicle` — second condition was `isGettingUpFromPronePosition` twice; corrected to `isGettingDownForPronePosition`Fix #4LTSProneGeneralHandler.luaRemoved `getSquareDelta()` — dead code that referenced undefined global `PLAYER_SQR`
+~~Files: `42\media\lua\client\LTSProneGeneralHandler.lua`, `42\media\lua\shared\LTSProneTimedAction.lua`, `42\media\lua\shared\LTSPlayerProneStates.lua`, `42\media\lua\shared\LTSBuffs\LTSCustomBuffs.lua`~~
+Scope: Both repos.
+Status: **Retired 2026-08-02.** Mod fully unsubscribed as of the 42.20 fresh solo restart. Moved to `_archive\LethalStealth\`.
 
 ---
 
 ### MoneyFromCreditCard (Workshop ID 3428650803)
 
-File: `42\media\lua\shared\MFCC_Patch.lua`Scope: Both repos.
-
-FixWhat it fixesFix #1`CheckBankTile`: `getAdjacentSquare()` nil crash on unloaded squares; `getSprite()` nil crash on tile objectsFix #2`DepositOnCreditCard`: `getAllKeepInputItems():get(0)` nil crashFix #3`GetMoneyFromCard`: `getAllInputItems():get(0)` nil crash
+~~File: `42\media\lua\shared\MFCC_Patch.lua`~~
+Scope: Both repos.
+Status: **Retired 2026-08-02.** Mod fully unsubscribed as of the 42.20 fresh solo restart. Moved to `_archive\MFCC_Patch.lua`. `loadModAfter=MoneyFromCreditCards` stripped from `mod.info`.
 
 ---
 
@@ -178,9 +192,9 @@ FixFileWhat it fixesFix #1TCTickCheckMusic.luaWhole-file copy predating upstream
 
 ### True Music Radio (Workshop ID 3631572046)
 
-File: `42\media\lua\client\TrueMusicRadio_Patch.lua`Scope: Both repos.
-
-FixWhat it fixesFix #1`TMRadio.prettyName` nil crash — `getItemNameFromFullType()` returns nil when the song's item type doesn't exist (content pack not installed). Nil is passed directly to `:gsub()`, throwing "attempted index: gsub of non-table: null" on every UI update tick. Wrapper returns `""` for nil display names so the radio UI shows nothing rather than crashing.
+~~File: `42\media\lua\client\TrueMusicRadio_Patch.lua`~~
+Scope: Both repos.
+Status: **Retired 2026-08-02.** Mod fully unsubscribed as of the 42.20 fresh solo restart. Moved to `_archive\TrueMusicRadio_Patch.lua`. `loadModAfter=TrueMusicRadio42` stripped from `mod.info`.
 
 ---
 
@@ -189,6 +203,8 @@ FixWhat it fixesFix #1`TMRadio.prettyName` nil crash — `getItemNameFromFullTyp
 File: `42\media\lua\client\RadioCom\TVRADIOTraits_ISRadioInteractions.lua`Scope: Both repos. Method: Whole-file copy.
 
 FixWhat it fixesFix #1`_interactCodes:len()` called before nil check — Java null radio objects pass `== nil` but crash on method calls
+
+**Status note (2026-08-02):** Still subscribed but NOT in the current 42.20 save's active mod list (`mods.txt`). Not retired — could come back — but the patch is currently inert. Left in place, `loadModAfter=LifestyleHobbies` kept in `mod.info`.
 
 ---
 
@@ -241,8 +257,9 @@ Bug report posted to Steam workshop page.
 
 ### Project Summer Car (Workshop ID 3564950449)
 
-File: `42\media\lua\server\PSC_Patch.lua`
+~~File: `42\media\lua\server\PSC_Patch.lua`~~
 Scope: Both repos.
+Status: **Retired 2026-08-02.** Mod fully unsubscribed as of the 42.20 fresh solo restart. Moved to `_archive\PSC_Patch.lua`.
 
 | Fix | What it fixes |
 |-----|---------------|
@@ -288,6 +305,8 @@ Scope: Both repos. Method: Whole-file copy.
 |-----|---------------|
 | Fix #1 | `NR_CharInfoPanel.setWidth` called `header:calculateLayout()` unconditionally on every invocation. Both `ISCharacterScreen:render()` (Info tab) and `ISHealthPanel:update()` (Health tab) call `setWidthAndParentWidth()` every frame, which propagates up to `setWidth`. `calculateLayout` iterates every cell, column, and row of the ISTableLayout header geometry -- running it every frame caused 1000ms+ spikes while the character info window was open. Fixed by capturing `panel.width` before the call and only calling `calculateLayout` when `actualW ~= prevW`. |
 
+**Status note (2026-08-02):** Still subscribed but NOT in the current 42.20 save's active mod list. Its own `mod.info` caps `versionMax=42.19` — likely why it's not loading on 42.20 stable. Not retired (could still update upstream), just currently inert.
+
 ---
 
 ### AnruisiTown x Guns of Marz Compatibility
@@ -301,7 +320,13 @@ This mod runs on `OnPostDistributionMerge` and handles substitution directly for
 
 Rooms covered: `GUNxxx`, `A625GUNXXX`, `A625GUNXXX2`, `AM16GUNXXX`, `A12GUNXXX`, `GUNKK`, `armyBarracks`, `dabaokkk`, `SSS`, `qiangxiepeijia`.
 
-**Known gap**: The large warehouse on the south edge of the map (likely room name `warehouse`) was not confirmed in-game. Check with `/lua print(getCell():getGridSquare(...):getRoom():getName())` on the ammo floor and add the room to this mod if needed.
+Companion patch: `42\media\lua\client\GoM_VanillaConverter_Patch.lua` (documented separately under "Guns of Marz") provides the right-click inventory conversion tool for vanilla items that slip past both this patch and GoM's own load-time stripping (airdrops, runtime injection). The two patches are complementary, not duplicates: this one substitutes at distribution-build time for AnruisiTown specifically; the converter handles anything that still shows up vanilla in a player's hands afterward.
+
+**Known gap, partially resolved 2026-08-02**: The large warehouse on the south edge of the map — `GUNxxx` in `AnruisiTownDistributions.lua`, described in-file as the "ammo warehouse (all calibres, carton format)" — is the room this patch already treats as `ammoOnlySubs()`. Steve confirmed in a prior session that this warehouse's shelves do show GoM ammo/attachments in place of vanilla stock in-game, which matches `GUNxxx` being covered. Still not 100% confirmed that `GUNxxx` is the exact room name for *that specific* warehouse (vs. a different room serving the same shelves) — if anything still looks vanilla there, re-check with `/lua print(getCell():getGridSquare(...):getRoom():getName())` on the ammo floor.
+
+Re-verified 2026-08-02 against current 42.20 source: all ten covered room names still exist unchanged in `AnruisiTownDistributions.lua` (workshop 3659676359). Also re-verified a sample of `MarzGuns.*` item names referenced in both this patch and the vanilla converter (M4A1, DEAGLE, P226, M92FS, M1911, W1887, Picatinny_Rail, 9x19_Bullet/_Box/_Crate) against current GoM 42.16 source (`3722134990\mods\GunsOfMarz\42.16\media\scripts\MarzWeapons\items\`) — all present, unchanged. Both patches should still be structurally sound.
+
+Unrelated note: a separate workshop mod, AnruisiTownGGSCompat (3677782030), also injects loot into AnruisiTown but for "Gael's Gun Store," not Guns of Marz. Steve subscribed to it only to let me inspect it for ideas; it's not going to be used and is not in the active mod list. No overlap with this patch.
 
 ---
 
