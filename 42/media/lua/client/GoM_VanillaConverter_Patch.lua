@@ -14,8 +14,14 @@
 -- convert them to GoM equivalents.
 --
 -- All conversions: consume the vanilla item, produce GoM item(s).
--- Guard: options only appear when GunsOfMarz is in the active
--- mod list. Inventory items only (not ground items).
+-- Guard: options only appear when GoM (mod id "MarzGuns") is in the
+-- active mod list. Inventory items only (not ground items).
+--
+-- FIX: gomActive() checked mod id "GunsOfMarz", but GoM's actual
+-- mod.info id is "MarzGuns" ("GunsOfMarz" is only the workshop
+-- folder/display name). getActivatedMods():contains() matches on
+-- id, so this check always returned false and the entire context
+-- menu hook below was a no-op regardless of whether GoM was active.
 -- ============================================================
 
 -- ---------------------------------------------------------------------------
@@ -23,7 +29,7 @@
 -- ---------------------------------------------------------------------------
 
 local function gomActive()
-    return getActivatedMods():contains("GunsOfMarz")
+    return getActivatedMods():contains("MarzGuns")
 end
 
 -- Remove one instance of fullType from the player's inventory.
@@ -93,9 +99,12 @@ local AMMO_MULTI = {
     {
         van = "Base.ShotgunShells", vanBox = "Base.ShotgunShellsBox", vanCrate = "Base.ShotgunShellsCarton",
         label = "12ga Shells",
+        -- FIX: GoM only has one generic MarzGuns.12Gauge_Crate; there is no
+        -- buckshot/slug split at the crate tier (unlike loose/box). Both
+        -- variants point at the same generic crate item.
         gomVariants = {
-            { label = "Buckshot", loose = "MarzGuns.12Gauge_Shell_Buckshot", box = "MarzGuns.12Gauge_Box_Buckshot", crate = "MarzGuns.12Gauge_Crate_Buckshot" },
-            { label = "Slug",     loose = "MarzGuns.12Gauge_Shell_Slug",     box = "MarzGuns.12Gauge_Box_Slug",     crate = "MarzGuns.12Gauge_Crate_Slug" },
+            { label = "Buckshot", loose = "MarzGuns.12Gauge_Shell_Buckshot", box = "MarzGuns.12Gauge_Box_Buckshot", crate = "MarzGuns.12Gauge_Crate" },
+            { label = "Slug",     loose = "MarzGuns.12Gauge_Shell_Slug",     box = "MarzGuns.12Gauge_Box_Slug",     crate = "MarzGuns.12Gauge_Crate" },
         },
         suffixed = false,
     },
