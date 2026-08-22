@@ -51,6 +51,24 @@ local function pick(options)
     return options[ZombRand(#options) + 1]
 end
 
+-- Unwrap an inventory context-menu item entry.
+-- Vanilla passes either the InventoryItem directly, or a wrapper table whose
+-- "items" field is a Java ArrayList. Some other mods that build their own
+-- context menu entries (observed: TwisTonFire QoL Modpack) instead put a
+-- plain Lua table in "items", which has no :get() method and previously
+-- crashed this hook with "Object tried to call nil".
+local function unwrapItemEntry(entry)
+    local item = entry
+    if type(entry) == "table" and entry.items then
+        if type(entry.items) == "table" then
+            item = entry.items[1]
+        else
+            item = entry.items:get(0)
+        end
+    end
+    return item
+end
+
 -- ---------------------------------------------------------------------------
 -- Condition transfer for gun conversions
 -- ---------------------------------------------------------------------------
@@ -200,10 +218,7 @@ local function onFillInventoryObjectContextMenu(playerNum, context, items)
     -- items entries can be InventoryItem directly or a wrapper table.
     local typesPresent = {}
     for _, entry in ipairs(items) do
-        local item = entry
-        if type(entry) == "table" and entry.items then
-            item = entry.items:get(0)
-        end
+        local item = unwrapItemEntry(entry)
         if item and instanceof(item, "InventoryItem") then
             typesPresent[item:getFullType()] = true
         end
@@ -309,10 +324,7 @@ local function onFillInventoryObjectContextMenu(playerNum, context, items)
             -- Locate the actual item object to inspect magazine and attachment state.
             local vanItem = nil
             for _, entry in ipairs(items) do
-                local item = entry
-                if type(entry) == "table" and entry.items then
-                    item = entry.items:get(0)
-                end
+                local item = unwrapItemEntry(entry)
                 if item and instanceof(item, "InventoryItem") and item:getFullType() == vanType then
                     vanItem = item
                     break
