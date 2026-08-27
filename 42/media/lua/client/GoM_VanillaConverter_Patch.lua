@@ -29,7 +29,13 @@
 -- ---------------------------------------------------------------------------
 
 local function gomActive()
-    return getActivatedMods():contains("MarzGuns")
+    -- GoM's workshop item (3722134990) ships two mutually-incompatible mod
+    -- id variants: "MarzGuns" (Old Version) and "GunsOfMarz" (current).
+    -- Exactly one can be active at a time, so check both and let whichever
+    -- one is enabled satisfy the gate. Item fullTypes stay "MarzGuns.*" in
+    -- both variants, so nothing else here needs to change.
+    local mods = getActivatedMods()
+    return mods:contains("MarzGuns") or mods:contains("GunsOfMarz")
 end
 
 -- Remove one instance of fullType from the player's inventory.
