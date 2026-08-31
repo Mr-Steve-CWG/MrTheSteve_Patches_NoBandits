@@ -3,7 +3,9 @@
 --   door branch had one; getWindow() returns nil if window smashed/removed since phantom was created)
 -- MrTheSteve_Patches: Fix #3 — SandboxVars fallback defaults (all six vars read without fallback;
 --   nil flows into ZombRand numeric comparisons in didZombieGetBored and crashes)
--- Source: workshop 3684834906, ZombieProofDW/media/lua/client/zombieThump.lua
+-- MrTheSteve_Patches: Fix #4 — door:ToggleDoorActual(source) replaced with door:ToggleDoorSilent();
+--   ToggleDoorActual requires a real IsoPlayer and NPEs when passed the zombie source once bust succeeds
+-- Source: workshop 3684834906, ZombieProofDW/42/media/lua/client/ZPWD/zombieThump.lua
 
 local SB_windowsEnabled
 local SB_doorsEnabled
@@ -203,7 +205,14 @@ if thumpTarget:getModData().isPhantomWindow == "door" and not SB_doorsEnabled th
                 
                 if not door:isBarricaded() and not door:isLocked() then
                     if SB_bustDoorChance > 0 and (ZombRand(100) * 100) < (SB_bustDoorChance * 100) then
-                        door:ToggleDoorActual(source)
+                        -- FIX #4: ToggleDoorActual(source) crashes -- it casts source to IsoPlayer
+                        -- internally and dereferences it unconditionally once the door state flips.
+                        -- source here is always a zombie (checked at function entry), so that cast is
+                        -- always null -> guaranteed NullPointerException at IsoDoor.java:1611 the moment
+                        -- the bust roll succeeds. ToggleDoorSilent() needs no character and does the same
+                        -- open/close + sprite/LOS update. Note: it skips IsoDoor's own sync() call, so in
+                        -- multiplayer this may not replicate to other clients -- fine for solo.
+                        door:ToggleDoorSilent()
                         source:getEmitter():playSound("BreakBarricadePlank")
                     end
                 end
