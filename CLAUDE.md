@@ -189,10 +189,9 @@ Status: **Retired 2026-08-02.** Mod fully unsubscribed as of the 42.20 fresh sol
 
 ### True MooZic (Workshop ID 3632610172)
 
-Files: `42\media\lua\client\TCTickCheckMusic.lua`, `42\media\lua\client\Context\WorldObject\worldContextJukeboxLSBridge.lua`
-Scope: Both repos. Method: Whole-file copies.
-
-FixFileWhat it fixesFix #1TCTickCheckMusic.luaWhole-file copy predating upstream `TCMusic_ForEachVehicle` rework; needs re-diff on next audio bug reportFix #2worldContextJukeboxLSBridge.luaUTF-8 BOM (U+FEFF) at byte 0 before `--[[` — caused Kahlua `ArrayIndexOutOfBoundsException` lexer crash on startup; stripped BOM, content otherwise identical to workshop source
+~~Files: `42\media\lua\client\TCTickCheckMusic.lua`, `42\media\lua\client\Context\WorldObject\worldContextJukeboxLSBridge.lua`~~
+Scope: Both repos.
+Status: **Fully retired 2026-08-31.** `TCTickCheckMusic.lua` was already retired 2026-04-30 (upstream fixed the vehicle audio iterator). `worldContextJukeboxLSBridge.lua` was found, on re-check, to already be entirely wrapped in a `--[[ ... JUKEBOX LIFESTYLES INTEGRATION DISABLED --]]` block comment — someone had already fully disabled it at some undocumented point (not just the BOM-strip Fix #2 this section previously described; no session record of when or why the full disable happened). Its target file no longer exists anywhere in current source either — the mod's jukebox code was restructured into `TMJukeboxTick.lua`, `TMJukeboxContext.lua`, `TMJukeboxDefs.lua`, `TMJukeboxServer.lua`, `TMJukeboxServerCommands.lua`, `TMJukeboxWindow.lua`. Moved to `_archive\worldContextJukeboxLSBridge.lua`. `loadModAfter=TrueMoozic` stripped from `mod.info` — True MooZic has zero active patches remaining.
 
 ---
 
@@ -210,7 +209,7 @@ File: `42\media\lua\client\RadioCom\TVRADIOTraits_ISRadioInteractions.lua`Scope:
 
 FixWhat it fixesFix #1`_interactCodes:len()` called before nil check — Java null radio objects pass `== nil` but crash on method calls
 
-**Status note (2026-08-02):** Still subscribed but NOT in the current 42.20 save's active mod list (`mods.txt`). Not retired — could come back — but the patch is currently inert. Left in place, `loadModAfter=LifestyleHobbies` kept in `mod.info`.
+**Status note (2026-08-31):** Re-added to the active mod list. Re-verified against current source: upstream added an `_interactCodes == nil` guard since our patch was written, but that only catches genuine Lua `nil` — the original diagnosis (Java-null radio objects that pass `== nil` but crash on method calls) is a different failure mode their guard doesn't cover. Our `tostring()`-based check still does the real work. `loadModAfter=LifestyleHobbies` unchanged.
 
 ---
 
@@ -233,6 +232,10 @@ FixWhat it fixes
 Fix #1`42.17\media\lua\Shared\Translate\EN\ItemName_PTBR.txt` declares table `ItemName_EN = {}` instead of `ItemName_PTBR = {}`. PZ loads all `.txt` files in the `EN\` folder for the English locale; files sort alphabetically so `ItemName_PTBR.txt` loads after `ItemName_EN.txt` and overwrites every item name with Portuguese. Fixed by appending all affected `Base.*` item names to the patch repo's `ItemName.json`, which loads after the workshop mod and restores the English strings.
 
 **Known unresolved:** Multiple Lua files under `42\media\lua\Client\` contain Portuguese comments with non-ASCII characters that cause a non-fatal Kahlua lexer error on load (`ErrorMagnifier: ArrayIndexOutOfBoundsException: Index 65022`). Whole-file copies with ASCII substitutions are ineffective because PZ loads workshop originals regardless. Bug reported to mod author. No action until upstream fix.
+
+**Re-verified 2026-08-31:** The mod now ships a dedicated `42.20\` version folder with a single, clean `ItemName.json` — no `_PTBR` counterpart file, so the original alphabetical-collision leak can't happen anymore for players on 42.20. Our added `Base.*` entries are now redundant but harmless: JSON translations merge per-key across all active mods, so ours just re-asserts the same correct string rather than conflicting with anything. Not removed since there's no cost to leaving them.
+
+**Scope note:** this shared `ItemName.json` file also carries entries for other mods entirely unrelated to Military Tool Kit (e.g. `AuthenticZClothing.*`), from some earlier session not documented under this heading. That's expected and safe given how JSON translation merging works (any mod can contribute keys to any `ItemName.json`-named file and they all merge), but worth knowing this file's real scope is broader than "Military Tool Kit fix" — it's become a general English-translation-restoration file.
 
 ---
 
@@ -326,14 +329,9 @@ Script-only overrides merge by `module` + item/recipe name across all active mod
 
 ### Neat Rocco (Workshop ID 3723726293)
 
-File: `42\media\lua\client\NeatRocco\NR_CharInfo\NR_CharInfoPanel.lua`
-Scope: Both repos. Method: Whole-file copy.
-
-| Fix | What it fixes |
-|-----|---------------|
-| Fix #1 | `NR_CharInfoPanel.setWidth` called `header:calculateLayout()` unconditionally on every invocation. Both `ISCharacterScreen:render()` (Info tab) and `ISHealthPanel:update()` (Health tab) call `setWidthAndParentWidth()` every frame, which propagates up to `setWidth`. `calculateLayout` iterates every cell, column, and row of the ISTableLayout header geometry -- running it every frame caused 1000ms+ spikes while the character info window was open. Fixed by capturing `panel.width` before the call and only calling `calculateLayout` when `actualW ~= prevW`. |
-
-**Status note (2026-08-02):** Still subscribed but NOT in the current 42.20 save's active mod list. Its own `mod.info` caps `versionMax=42.19` — likely why it's not loading on 42.20 stable. Not retired (could still update upstream), just currently inert.
+~~File: `42\media\lua\client\NeatRocco\NR_CharInfo\NR_CharInfoPanel.lua`~~
+Scope: Both repos.
+Status: **Retired 2026-08-31, and risky as-was.** Mod is back in the active rotation and got a substantial 42.20 rewrite — new `42.20\` version folder, own mod ID `Neat_Rocco` (note: not `NeatRocco`), a new `require=\NeatUI_Framework` dependency, and its own near-identical width-change gate (`oldW`/`actualW` comparison around `calculateLayout`, same "hosted vanilla sub-panels call setWidth every frame" reasoning as our original fix). Our patch file was a 601-line whole-file copy predating that rewrite (current upstream is 658 lines, restructured around the new NeatUI Framework hooks) — if it had ever won the load-order race, it would have silently rolled back the entire NeatUI Framework integration, not just re-introduced the performance issue. Moved to `_archive\NR_CharInfoPanel.lua`. Mod ID `Neat_Rocco` was never in `loadModAfter`, so no entry to strip.
 
 ---
 
@@ -372,8 +370,8 @@ Patches Filibuster Rhymes' Used Cars (Workshop 3683878228, `B42FRUsedCarsAnimAlp
 #### SOTO_TransferValue_Patch.lua (client)
 Patches Simple Overhaul: Traits and Occupations (Workshop 2840805724). Confirmed `SOTOISInventoryTransferAction.lua` (42.15 folder, currently active version) still does raw arithmetic on `DisorganizedTransferredValue`/`AllThumbsTransferredValue` ModData fields with no init guard. Wraps `perform()`/`update()` to zero-init both fields first.
 
-#### JG_UmbrellaCorp_BodyLocation_Patch.lua (shared)
-Patches `[J&G] Umbrella Corp Uniform` (Workshop 3675741487). Confirmed both winter jacket items still declare bare `JacketHat` (no namespace) across every version folder on disk. Registers `JG:JacketHat` as a proper `ItemBodyLocation` and adds it to the Human body location group.
+#### JG_UmbrellaCorp_BodyLocation_Patch.lua (shared) — RETIRED 2026-08-31
+~~Patched `[J&G] Umbrella Corp Uniform` (Workshop 3675741487).~~ Confirmed both winter jacket items *previously* declared bare `JacketHat` (no namespace) across every version folder on disk as of 2026-08-02. Re-checked 2026-08-31: the author fixed this properly upstream, switching the item's `BodyLocation` to `base:jackethat` — confirmed `jackethat` is a real, pre-existing vanilla body location (used by `Jacket_Padded`, hooded ponchos, etc. in `generated\items\clothing.txt`), so this now resolves correctly without any patch. Our old fix registered an unrelated `JG:JacketHat` location that nothing references anymore — inert, not risky, but pointless. Moved to `_archive\JG_UmbrellaCorp_BodyLocation_Patch.lua`. `loadModAfter=[J&G] Umbrella Corp Uniform` stripped from `mod.info`.
 
 #### ISWearClothing_NilItem_Patch.lua (shared)
 Patches vanilla `ISWearClothing.lua`. Confirmed current 42.20 vanilla source still calls `self:isAlreadyEquipped(self.item)` right after a nil-capable inventory re-fetch, with no guard inside `isAlreadyEquipped` before `self.item:hasTag(...)`. Race is triggered by mods that chain-patch `ISInventoryTransferAction:perform` -- SOTO and ETW both do, and are both active. Adds the nil guard.
@@ -384,7 +382,9 @@ Patches vanilla `MapSpawnSelect` (character creation map/spawn picker). Not mod-
 #### RVInterior_SwitchSeat_Patch.lua (client)
 Patches PROJECT RV Interior (Workshop 3543229299) and vanilla `ISVehicleDashboard`. Confirmed current vanilla `ISVehicleDashboard.lua` still calls `vehicle:isDriver(character)` with no nil check right after `getVehicle()` -- crash during the interior/vehicle transition. Also confirmed current `RVClientSP.lua`'s `ReturnPlayerToSeat` still searches only a 1-tile radius with no attempt cap, causing an infinite retry loop and a stuck player on large RVs. Fix widens the search to radius 4, adds a 300-tick timeout, and verifies the found vehicle is a registered RV type. Note: the original HellDrinx fix also covered Project Summer Car's dashboard replacer for the same crash; omitted here since PSC's patch is retired -- re-add if PSC ever comes back.
 
-**Archived, not deployed:** `_archive\LifestyleHobbies_pending42.20\` holds `HD_Fix_LFH_ToiletMenu.lua` and `HD_Fix_Lifestyle_NilModData.lua`, both targeting Lifestyle: Hobbies (3403870858), which is subscribed but not in the active 42.20 mod list (not yet updated for 42.20). Kept for reference in case the mod update doesn't address these itself. `HD_Fix_Lifestyle_NilModData.lua` uses `pcall` in one spot -- flagged in-file as needing replacement with explicit guards before ever actually deploying it, per house rule.
+**Re-verified 2026-08-31:** both bugs still unchanged in current source — the mod's Aug 25 update didn't touch either.
+
+**Archived, not deployed:** `_archive\LifestyleHobbies_pending42.20\` holds `HD_Fix_LFH_ToiletMenu.lua` and `HD_Fix_Lifestyle_NilModData.lua`, both targeting Lifestyle: Hobbies (3403870858). Written when that mod wasn't yet updated for 42.20 — **it now is, and is back in the active mod list as of 2026-08-31** (see the Lifestyle: Hobbies entry above). Not re-checked against current Lifestyle source this session; flagging for a follow-up pass to confirm whether these two fixes are still needed, already fixed upstream, or safe to leave archived. `HD_Fix_Lifestyle_NilModData.lua` uses `pcall` in one spot -- flagged in-file as needing replacement with explicit guards before ever actually deploying it, per house rule.
 
 ---
 
