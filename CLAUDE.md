@@ -273,12 +273,22 @@ Both conditions resolve permanently once the player enters the vehicle for the f
 
 ### Zombies Drop Ammo Boxes (Workshop ID 3700723031)
 
-File: `42\media\lua\server\AmmoLootDropBox.lua`
+~~File: `42\media\lua\server\AmmoLootDropBox.lua`~~
+Scope: Both repos.
+Status: **Retired 2026-08-31.** File on disk had drifted far beyond the documented Fix #1 (a one-line `tostring()` guard) into a 302-line reimplementation — dynamic item scanner, hardcoded fallback item list, custom drop-rate formula, and a `pcall`-based `safe()` wrapper that violates the house no-`pcall` rule. No session record of when/why the rewrite happened. Also discovered the file's relative path never matched the real mod's path (missing `Items/` subfolder — real file is at `server/Items/AmmoLootDropBox.Lua`), so this override had never actually taken effect regardless of content. Steve confirmed he hasn't relied on it and elected to drop it rather than validate or rewrite. Moved to `_archive\AmmoLootDropBox.lua`. `loadModAfter=AmmoLootDropBox` stripped from `mod.info`.
+
+---
+
+### More Car Features + Spawn Zones Expansion (Workshop ID 3520758551)
+
+File: `42\media\lua\server\Vehicles\OnSpawnVehicleAdditionalFeatures.lua`
 Scope: Both repos. Method: Whole-file copy.
 
 | Fix | What it fixes |
 |-----|---------------|
-| Fix #1 | `isAmmoBoxItem` builds a `combined` string by concatenating `fullName` with three other values. `getItemFullName` returns `item:getFullName()` directly — for vehicle part items this is a Java object, not a Lua string, and `..` throws `__concat not defined`. Crash happens inside `buildAmmoBoxPool` on world load, so the pool never builds and zombies never drop ammo boxes for the session. Fixed by wrapping `fullName` in `tostring()`. |
+| Fix #1 | `fillEventVehiclesTable` (on `OnLoadedMapZones`) buckets every loaded vehicle script into `ReplacementVehicles[mechanicType]`, where `mechanicType` is read raw and unvalidated from each vehicle script's own file (`Integer.parseInt`, no bounds check). `ReplacementVehicles` only defines keys `"0"`-`"3"` plus named zone keys. Some active vehicle script declares a `mechanicType` outside that range, so `table.insert` on a nil table throws an NPE and crashes world load (`IsoWorld.init`). Guarded with a nil check before insert, plus a `print("MCF Warning: ...")` naming the offending vehicle script and its mechanicType so the actual culprit mod can be identified and reported, rather than silently dropping it. |
+
+**Root-cause note:** initial fix (`WayMoreCars` mod ID) was missing from `loadModAfter` in both repos, so this override was silently losing the load-order race back to the original workshop file — same crash signature persisted post-patch until this was caught via a missing `MCF Warning:` print in the log combined with a `mod "WayMoreCars" overrides ...` log line showing the workshop copy winning. Confirmed via `console.txt` before trusting the fix.
 
 ---
 
@@ -293,6 +303,10 @@ Scope: Both repos. Soft dependency — only engages when `GunsOfMarz` is in the 
 | Fix #2 | Gun loop used `goto continue` / `::continue::` (Lua 5.2 syntax) to skip entries where the item object couldn't be found. Kahlua parses `goto` as a variable name and throws a syntax error on load, preventing the entire file from compiling. Replaced with `if vanItem ~= nil then ... end` block. |
 
 **Vanilla item name notes:** 9mm/45/38/357/44 loose rounds use `Bullets9mm` / `Bullets45` etc. prefix (not `9mmBullets`). Shotgun box/carton are `ShotgunShellsBox` / `ShotgunShellsCarton`.
+
+**`loadModAfter` correction (2026-08-31):** `MarzGuns` in `mod.info` was stale — GoM's own `mod.info` lists `MarzGuns` under `incompatible=`, it's the dead legacy ID, not what's active. Replaced with `GunsOfMarz,SWMG` (GoM's real current ID plus its required Gunworks framework dependency, workshop 3722064198). Also added `loadModAfter` entries for `SimpleOverhaulTraitsAndOccupations`, `[J&G] Umbrella Corp Uniform`, `PROJECTRVInterior42`, and `B42FRUsedCarsAnimAlpha` covering the HellDrinx-derived patches below that monkeypatch those mods' own functions — none of these had `loadModAfter` entries previously, so load order relative to those mods was never guaranteed.
+
+**5.56x45 box count (50→20):** confirmed intentional GoM-side rebalance (pulls 5.56 down to match the 20-round standard other rifle calibers already used), not a bug. Steve wants it reverted anyway; discussion paused, no override written yet as of 2026-08-31.
 
 ---
 
