@@ -1,0 +1,248 @@
+module MarzGuns {
+
+    item 556x45_Box {
+        DisplayCategory    = Ammo,
+        ItemType           = base:normal,
+        Weight             = 0.383,
+        Icon               = 556x45_Box,
+        AlwaysWelcomeGift  = true,
+        MetalValue         = 40.0,
+        PlaceMultipleSound = BoxOfRoundsPlaceAll,
+        PlaceOneSound      = BoxOfRoundsPlaceOne,
+        StaticModel        = MarzGuns.556x45_Box,
+        WorldStaticModel   = MarzGuns.556x45_Box,
+        DoubleClickRecipe  = OpenBoxOf50Bullets,
+        Tags               = base:hasmetal;base:ignorezombiedensity;base:ammo;marzguns:ammobox50;marzguns:ammobox,
+    }
+
+    item 556x45_Box_HollowPoint {
+        DisplayCategory    = Ammo,
+        ItemType           = base:normal,
+        Weight             = 0.383,
+        Icon               = 556x45_Box_HP,
+        AlwaysWelcomeGift  = true,
+        MetalValue         = 40.0,
+        PlaceMultipleSound = BoxOfRoundsPlaceAll,
+        PlaceOneSound      = BoxOfRoundsPlaceOne,
+        StaticModel        = MarzGuns.556x45_Box_HP,
+        WorldStaticModel   = MarzGuns.556x45_Box_HP,
+        DoubleClickRecipe  = OpenBoxOf50Bullets,
+        Tags               = base:hasmetal;base:ignorezombiedensity;base:ammo;marzguns:ammobox50;marzguns:ammobox,
+    }
+
+    item 556x45_Box_ArmorPiercing {
+        DisplayCategory    = Ammo,
+        ItemType           = base:normal,
+        Weight             = 0.383,
+        Icon               = 556x45_Box_AP,
+        AlwaysWelcomeGift  = true,
+        MetalValue         = 40.0,
+        PlaceMultipleSound = BoxOfRoundsPlaceAll,
+        PlaceOneSound      = BoxOfRoundsPlaceOne,
+        StaticModel        = MarzGuns.556x45_Box_AP,
+        WorldStaticModel   = MarzGuns.556x45_Box_AP,
+        DoubleClickRecipe  = OpenBoxOf50Bullets,
+        Tags               = base:hasmetal;base:ignorezombiedensity;base:ammo;marzguns:ammobox50;marzguns:ammobox,
+    }
+
+    item 556x45_Box_Subsonic {
+        DisplayCategory    = Ammo,
+        ItemType           = base:normal,
+        Weight             = 0.383,
+        Icon               = 556x45_Box_SS,
+        AlwaysWelcomeGift  = true,
+        MetalValue         = 40.0,
+        PlaceMultipleSound = BoxOfRoundsPlaceAll,
+        PlaceOneSound      = BoxOfRoundsPlaceOne,
+        StaticModel        = MarzGuns.556x45_Box_SS,
+        WorldStaticModel   = MarzGuns.556x45_Box_SS,
+        DoubleClickRecipe  = OpenBoxOf50Bullets,
+        Tags               = base:hasmetal;base:ignorezombiedensity;base:ammo;marzguns:ammobox50;marzguns:ammobox,
+    }
+
+    item 556x45_Box_Overpressured {
+        DisplayCategory    = Ammo,
+        ItemType           = base:normal,
+        Weight             = 0.383,
+        Icon               = 556x45_Box_OP,
+        AlwaysWelcomeGift  = true,
+        MetalValue         = 40.0,
+        PlaceMultipleSound = BoxOfRoundsPlaceAll,
+        PlaceOneSound      = BoxOfRoundsPlaceOne,
+        StaticModel        = MarzGuns.556x45_Box_OP,
+        WorldStaticModel   = MarzGuns.556x45_Box_OP,
+        DoubleClickRecipe  = OpenBoxOf50Bullets,
+        Tags               = base:hasmetal;base:ignorezombiedensity;base:ammo;marzguns:ammobox50;marzguns:ammobox,
+    }
+
+    item 556x45_Carton {
+        DisplayCategory    = Ammo,
+        ItemType           = base:normal,
+        Weight             = 3.677,
+        Icon               = Parcel_Medium_Military,
+        AlwaysWelcomeGift  = true,
+        MetalValue         = 400.0,
+        PlaceMultipleSound = BoxOfRoundsPlaceAll,
+        PlaceOneSound      = BoxOfRoundsPlaceOne,
+        WorldStaticModel   = Parcel_Military_Medium,
+        Tags               = base:hasmetal;base:ignorezombiedensity;marzguns:ammocarton,
+        DoubleClickRecipe  = OpenCartonOfBoxesOfAmmo,
+    }
+
+    item 556x45_Carton_HollowPoint {
+        DisplayCategory    = Ammo,
+        ItemType           = base:normal,
+        Weight             = 3.677,
+        Icon               = Parcel_Medium_Military,
+        AlwaysWelcomeGift  = true,
+        MetalValue         = 400.0,
+        PlaceMultipleSound = BoxOfRoundsPlaceAll,
+        PlaceOneSound      = BoxOfRoundsPlaceOne,
+        WorldStaticModel   = Parcel_Military_Medium,
+        Tags               = base:hasmetal;base:ignorezombiedensity;marzguns:ammocarton,
+        DoubleClickRecipe  = OpenCartonOfBoxesOfAmmo,
+    }
+
+    item 556x45_Carton_ArmorPiercing {
+        DisplayCategory    = Ammo,
+        ItemType           = base:normal,
+        Weight             = 3.677,
+        Icon               = Parcel_Medium_Military,
+        AlwaysWelcomeGift  = true,
+        MetalValue         = 400.0,
+        PlaceMultipleSound = BoxOfRoundsPlaceAll,
+        PlaceOneSound      = BoxOfRoundsPlaceOne,
+        WorldStaticModel   = Parcel_Military_Medium,
+        Tags               = base:hasmetal;base:ignorezombiedensity;marzguns:ammocarton,
+        DoubleClickRecipe  = OpenCartonOfBoxesOfAmmo,
+    }
+
+    item 556x45_Carton_Subsonic {
+        DisplayCategory    = Ammo,
+        ItemType           = base:normal,
+        Weight             = 3.677,
+        Icon               = Parcel_Medium_Military,
+        AlwaysWelcomeGift  = true,
+        MetalValue         = 400.0,
+        PlaceMultipleSound = BoxOfRoundsPlaceAll,
+        PlaceOneSound      = BoxOfRoundsPlaceOne,
+        WorldStaticModel   = Parcel_Military_Medium,
+        Tags               = base:hasmetal;base:ignorezombiedensity;marzguns:ammocarton,
+        DoubleClickRecipe  = OpenCartonOfBoxesOfAmmo,
+    }
+
+    item 556x45_Carton_Overpressured {
+        DisplayCategory    = Ammo,
+        ItemType           = base:normal,
+        Weight             = 3.677,
+        Icon               = Parcel_Medium_Military,
+        AlwaysWelcomeGift  = true,
+        MetalValue         = 400.0,
+        PlaceMultipleSound = BoxOfRoundsPlaceAll,
+        PlaceOneSound      = BoxOfRoundsPlaceOne,
+        WorldStaticModel   = Parcel_Military_Medium,
+        Tags               = base:hasmetal;base:ignorezombiedensity;marzguns:ammocarton,
+        DoubleClickRecipe  = OpenCartonOfBoxesOfAmmo,
+    }
+
+    item 556x45_Crate {
+        DisplayCategory    = Ammo,
+        ItemType           = base:normal,
+        Weight             = 11.766,
+        Icon               = Ammo_Crate,
+        AlwaysWelcomeGift  = true,
+        MetalValue         = 400.0,
+        PlaceMultipleSound = BoxOfRoundsPlaceAll,
+        PlaceOneSound      = BoxOfRoundsPlaceOne,
+        WorldStaticModel   = MarzGuns.Ammo_Crate,
+        Tags               = base:hasmetal;base:ignorezombiedensity;marzguns:ammocrate,
+        DoubleClickRecipe  = OpenCrateOfBoxesOfAmmo,
+    }
+
+    item 556x45_Crate_HollowPoint {
+        DisplayCategory    = Ammo,
+        ItemType           = base:normal,
+        Weight             = 11.766,
+        Icon               = Ammo_Crate,
+        AlwaysWelcomeGift  = true,
+        MetalValue         = 400.0,
+        PlaceMultipleSound = BoxOfRoundsPlaceAll,
+        PlaceOneSound      = BoxOfRoundsPlaceOne,
+        WorldStaticModel   = MarzGuns.Ammo_Crate,
+        Tags               = base:hasmetal;base:ignorezombiedensity;marzguns:ammocrate,
+        DoubleClickRecipe  = OpenCrateOfBoxesOfAmmo,
+    }
+
+    item 556x45_Crate_ArmorPiercing {
+        DisplayCategory    = Ammo,
+        ItemType           = base:normal,
+        Weight             = 11.766,
+        Icon               = Ammo_Crate,
+        AlwaysWelcomeGift  = true,
+        MetalValue         = 400.0,
+        PlaceMultipleSound = BoxOfRoundsPlaceAll,
+        PlaceOneSound      = BoxOfRoundsPlaceOne,
+        WorldStaticModel   = MarzGuns.Ammo_Crate,
+        Tags               = base:hasmetal;base:ignorezombiedensity;marzguns:ammocrate,
+        DoubleClickRecipe  = OpenCrateOfBoxesOfAmmo,
+    }
+
+    item 556x45_Crate_Subsonic {
+        DisplayCategory    = Ammo,
+        ItemType           = base:normal,
+        Weight             = 11.766,
+        Icon               = Ammo_Crate,
+        AlwaysWelcomeGift  = true,
+        MetalValue         = 400.0,
+        PlaceMultipleSound = BoxOfRoundsPlaceAll,
+        PlaceOneSound      = BoxOfRoundsPlaceOne,
+        WorldStaticModel   = MarzGuns.Ammo_Crate,
+        Tags               = base:hasmetal;base:ignorezombiedensity;marzguns:ammocrate,
+        DoubleClickRecipe  = OpenCrateOfBoxesOfAmmo,
+    }
+
+    item 556x45_Crate_Overpressured {
+        DisplayCategory    = Ammo,
+        ItemType           = base:normal,
+        Weight             = 11.766,
+        Icon               = Ammo_Crate,
+        AlwaysWelcomeGift  = true,
+        MetalValue         = 400.0,
+        PlaceMultipleSound = BoxOfRoundsPlaceAll,
+        PlaceOneSound      = BoxOfRoundsPlaceOne,
+        WorldStaticModel   = MarzGuns.Ammo_Crate,
+        Tags               = base:hasmetal;base:ignorezombiedensity;marzguns:ammocrate,
+        DoubleClickRecipe  = OpenCrateOfBoxesOfAmmo,
+    }
+
+}
+
+module Base {
+
+    craftRecipe OpenBoxOf50Bullets {
+        timedAction = OpenAmmoBox,
+        time        = 15,
+        category    = Packing,
+        recipeGroup = OpenBox,
+        canWalk     = true,
+        Tags        = InHandCraft;CanBeDoneInDark,
+        inputs {
+            item 1 tags[marzguns:ammobox50] mappers[ammoType] flags[Prop2;AllowFavorite;InheritFavorite],
+        }
+        outputs {
+            item 50 mapper:ammoType,
+        }
+        itemMapper ammoType {
+            SWMG.9x19_Bullet                = MarzGuns.9x19_Box,
+            SWMG.45_Bullet                  = MarzGuns.45_Box,
+            SWMG.38_Bullet                  = MarzGuns.38_Box,
+            SWMG.357_Bullet                 = MarzGuns.357_Box,
+            SWMG.556x45_Bullet              = MarzGuns.556x45_Box,
+            SWMG.556x45_Bullet_HollowPoint  = MarzGuns.556x45_Box_HollowPoint,
+            SWMG.556x45_Bullet_ArmorPiercing = MarzGuns.556x45_Box_ArmorPiercing,
+            SWMG.556x45_Bullet_Subsonic     = MarzGuns.556x45_Box_Subsonic,
+            SWMG.556x45_Bullet_Overpressured = MarzGuns.556x45_Box_Overpressured,
+        }
+    }
+
+}
