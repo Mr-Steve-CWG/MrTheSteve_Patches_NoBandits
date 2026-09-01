@@ -4,14 +4,20 @@ Read this file at the start of every session. Update it at the end of any sessio
 
 ---
 
+## This is the active repo (as of 2026-08-31)
+
+`MrTheSteve_Patches` (the Bandits-inclusive repo) is now **unmaintained** — Steve isn't running Bandits, BanditsWeekOne, or BanditsImprovedAI, and has no plans to unless those mods get a substantial rewrite. All new patches, `loadModAfter` edits, and git operations happen here only. Don't mirror changes into the Bandits repo by default; check in with Steve first if that ever needs to change.
+
+---
+
 ## Project Purpose
 
 Private patch mod for Project Zomboid Build 42. Goal: fix demonstrably broken behavior in workshop mods without altering mod author intent. If something looks like a design choice rather than a bug, flag it and confirm with Steve before touching it.
 
 Two parallel repos:
 
-- `MrTheSteve_Patches` — full patch set including Bandits-specific fixes
-- `MrTheSteve_Patches_NoBandits` — identical minus anything that depends on the Bandits mod
+- `MrTheSteve_Patches` — full patch set including Bandits-specific fixes. **Unmaintained as of 2026-08-31**, see note above.
+- `MrTheSteve_Patches_NoBandits` — identical minus anything that depends on the Bandits mod. **This is the actively maintained repo.**
 
 Unless a patch is explicitly Bandits-specific, it goes in both repos.
 
