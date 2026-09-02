@@ -11,8 +11,8 @@ module MarzGuns {
         PlaceOneSound      = BoxOfRoundsPlaceOne,
         StaticModel        = MarzGuns.556x45_Box,
         WorldStaticModel   = MarzGuns.556x45_Box,
-        DoubleClickRecipe  = OpenBoxOf50Bullets,
-        Tags               = base:hasmetal;base:ignorezombiedensity;base:ammo;marzguns:ammobox50;marzguns:ammobox,
+        DoubleClickRecipe  = OpenBoxOf50Bullets_556,
+        Tags               = base:hasmetal;base:ignorezombiedensity;base:ammo;marzguns:ammobox50_556;marzguns:ammobox,
     }
 
     item 556x45_Box_HollowPoint {
@@ -26,8 +26,8 @@ module MarzGuns {
         PlaceOneSound      = BoxOfRoundsPlaceOne,
         StaticModel        = MarzGuns.556x45_Box_HP,
         WorldStaticModel   = MarzGuns.556x45_Box_HP,
-        DoubleClickRecipe  = OpenBoxOf50Bullets,
-        Tags               = base:hasmetal;base:ignorezombiedensity;base:ammo;marzguns:ammobox50;marzguns:ammobox,
+        DoubleClickRecipe  = OpenBoxOf50Bullets_556,
+        Tags               = base:hasmetal;base:ignorezombiedensity;base:ammo;marzguns:ammobox50_556;marzguns:ammobox,
     }
 
     item 556x45_Box_ArmorPiercing {
@@ -41,8 +41,8 @@ module MarzGuns {
         PlaceOneSound      = BoxOfRoundsPlaceOne,
         StaticModel        = MarzGuns.556x45_Box_AP,
         WorldStaticModel   = MarzGuns.556x45_Box_AP,
-        DoubleClickRecipe  = OpenBoxOf50Bullets,
-        Tags               = base:hasmetal;base:ignorezombiedensity;base:ammo;marzguns:ammobox50;marzguns:ammobox,
+        DoubleClickRecipe  = OpenBoxOf50Bullets_556,
+        Tags               = base:hasmetal;base:ignorezombiedensity;base:ammo;marzguns:ammobox50_556;marzguns:ammobox,
     }
 
     item 556x45_Box_Subsonic {
@@ -56,8 +56,8 @@ module MarzGuns {
         PlaceOneSound      = BoxOfRoundsPlaceOne,
         StaticModel        = MarzGuns.556x45_Box_SS,
         WorldStaticModel   = MarzGuns.556x45_Box_SS,
-        DoubleClickRecipe  = OpenBoxOf50Bullets,
-        Tags               = base:hasmetal;base:ignorezombiedensity;base:ammo;marzguns:ammobox50;marzguns:ammobox,
+        DoubleClickRecipe  = OpenBoxOf50Bullets_556,
+        Tags               = base:hasmetal;base:ignorezombiedensity;base:ammo;marzguns:ammobox50_556;marzguns:ammobox,
     }
 
     item 556x45_Box_Overpressured {
@@ -71,8 +71,8 @@ module MarzGuns {
         PlaceOneSound      = BoxOfRoundsPlaceOne,
         StaticModel        = MarzGuns.556x45_Box_OP,
         WorldStaticModel   = MarzGuns.556x45_Box_OP,
-        DoubleClickRecipe  = OpenBoxOf50Bullets,
-        Tags               = base:hasmetal;base:ignorezombiedensity;base:ammo;marzguns:ammobox50;marzguns:ammobox,
+        DoubleClickRecipe  = OpenBoxOf50Bullets_556,
+        Tags               = base:hasmetal;base:ignorezombiedensity;base:ammo;marzguns:ammobox50_556;marzguns:ammobox,
     }
 
     item 556x45_Carton {
@@ -219,7 +219,7 @@ module MarzGuns {
 
 module Base {
 
-    craftRecipe OpenBoxOf50Bullets {
+    craftRecipe OpenBoxOf50Bullets_556 {
         timedAction = OpenAmmoBox,
         time        = 15,
         category    = Packing,
@@ -227,20 +227,16 @@ module Base {
         canWalk     = true,
         Tags        = InHandCraft;CanBeDoneInDark,
         inputs {
-            item 1 tags[marzguns:ammobox50] mappers[ammoType] flags[Prop2;AllowFavorite;InheritFavorite],
+            item 1 tags[marzguns:ammobox50_556] mappers[ammoType] flags[Prop2;AllowFavorite;InheritFavorite],
         }
         outputs {
             item 50 mapper:ammoType,
         }
         itemMapper ammoType {
-            SWMG.9x19_Bullet                = MarzGuns.9x19_Box,
-            SWMG.45_Bullet                  = MarzGuns.45_Box,
-            SWMG.38_Bullet                  = MarzGuns.38_Box,
-            SWMG.357_Bullet                 = MarzGuns.357_Box,
-            SWMG.556x45_Bullet              = MarzGuns.556x45_Box,
-            SWMG.556x45_Bullet_HollowPoint  = MarzGuns.556x45_Box_HollowPoint,
+            SWMG.556x45_Bullet               = MarzGuns.556x45_Box,
+            SWMG.556x45_Bullet_HollowPoint   = MarzGuns.556x45_Box_HollowPoint,
             SWMG.556x45_Bullet_ArmorPiercing = MarzGuns.556x45_Box_ArmorPiercing,
-            SWMG.556x45_Bullet_Subsonic     = MarzGuns.556x45_Box_Subsonic,
+            SWMG.556x45_Bullet_Subsonic      = MarzGuns.556x45_Box_Subsonic,
             SWMG.556x45_Bullet_Overpressured = MarzGuns.556x45_Box_Overpressured,
         }
     }

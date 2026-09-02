@@ -8,6 +8,21 @@ Read this file at the start of every session. Update it at the end of any sessio
 
 `MrTheSteve_Patches` (the Bandits-inclusive repo) is now **unmaintained** — Steve isn't running Bandits, BanditsWeekOne, or BanditsImprovedAI, and has no plans to unless those mods get a substantial rewrite. All new patches, `loadModAfter` edits, and git operations happen here only. Don't mirror changes into the Bandits repo by default; check in with Steve first if that ever needs to change.
 
+## NoBandits repo also shelved as of 2026-09-01 (temporary — not retired)
+
+Steve is playing this modlist **patch-free** for now. Not a permanent retirement like the Bandits repo above — this is a pause while an unresolved crash gets sorted out, and the plan is to rebuild the active set slowly, one confirmed-necessary patch at a time, rather than redeploy everything at once.
+
+**Why:** with the full patch mod active, every load attempt (existing save or new game) crashes to desktop immediately after clicking Start. Confirmed via `hs_err_pid*.log`: a native (off-heap) JVM memory allocation failure, not a Lua/script error — Java heap itself was nowhere near its `-Xmx` ceiling when it died. Without the patch mod active, the game loads and runs fine on the same save and same workshop mod list.
+
+**Ruled out this session:**
+- The `Duplicate Prop2` recipe-load crash from redefining GoM's `OpenBoxOf50Bullets` — real bug, fixed (new `OpenBoxOf50Bullets_556` recipe + `ammobox50_556` tag, scoped only to 5.56, doesn't touch GoM's native recipes or other calibers). This fix got the game *past* Start into the OOM crash, so it's confirmed working, just insufficient on its own.
+- `GoM_556x45_Box50_Restore.txt` as the OOM cause — pulled from the active folder and tested in isolation; same OOM crash still happened without it.
+- Recent `mod.info`/`loadModAfter` edits and the various retired-patch archive moves from the 08-31 session — none of these add native memory pressure, and the crash reproduces with or without them.
+
+**Not yet isolated:** which of the remaining active Lua patches (or their cumulative weight) is driving the native allocation failure. Next cheapest bisection step, if picked back up: disable `OnSpawnVehicleAdditionalFeatures.lua` (More Car Features) and `zombieThump.lua`/`serverCommands.lua` (Z-Proof) first, since those do the heaviest work at world-init/spawn — but this hasn't been tried yet.
+
+**Current plan:** play vanilla + workshop mods only, no private patches. When a specific bug is hit in play, diagnose and write a single targeted patch for it (following the usual root-cause workflow), rather than re-enabling the whole inventory. Re-introduce the confirmed crash-preventers first if their underlying bugs resurface — **More Car Features** (`OnSpawnVehicleAdditionalFeatures.lua`, prevents a world-load NPE crash), **Z-Proof Doors & Windows** (`zombieThump.lua` + `serverCommands.lua`, three nil-crash fixes), and **RVInterior_SwitchSeat_Patch** (vehicle interior transition crash + stuck-player loop) are the highest-value patches in the inventory below if things start breaking again.
+
 ---
 
 ## Project Purpose
